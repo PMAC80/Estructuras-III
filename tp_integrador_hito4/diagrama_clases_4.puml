@@ -1,0 +1,66 @@
+@startuml
+
+abstract class Usuario {
+    - id : int
+    - nombre : string
+    - email : string
+    - contraseña : string
+    + iniciarSesion()
+}
+
+class Cliente {
+    + crearTicket()
+    + consultarTicket()
+}
+
+class Representante {
+    - especialidad : string
+    + responderTicket()
+    + registrarHito()
+}
+
+class Ticket {
+    - id : int
+    - descripcion : string
+    - estado : string
+    - fecha : date
+    + abrir()
+    + cerrar()
+}
+
+class Producto {
+    - idProducto : int
+    - nombre : string
+    - marca : string
+}
+
+class TipoProducto {
+    - idTipo : int
+    - nombreTipo : string
+}
+
+class Hito {
+    - id : int
+    - descripcion : string
+    - fecha : date
+}
+
+class Mensaje {
+    - id : int
+    - contenido : string
+    - fecha : date
+}
+
+Usuario <|-- Cliente
+Usuario <|-- Representante
+
+Cliente "1" --> "*" Ticket : crea
+Representante "1" --> "*" Ticket : atiende
+
+Ticket "1" --> "1" Producto
+Producto "*" --> "1" TipoProducto
+
+Ticket *-- Hito
+Ticket *-- Mensaje
+
+@enduml
