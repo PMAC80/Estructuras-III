@@ -1,0 +1,20 @@
+@startuml
+
+actor Usuario
+
+participant Producto
+participant TipoProducto
+
+Usuario -> Producto : seleccionarProducto()
+
+Usuario -> TipoProducto : seleccionarTipo()
+
+Usuario -> Producto : asignarTipo(tipo)
+
+Producto -> TipoProducto : obtenerTipo()
+
+TipoProducto --> Producto : tipo
+
+Producto --> Usuario : confirmación
+
+@enduml
