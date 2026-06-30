@@ -26,29 +26,34 @@ class Ticket {
     - fecha : date
     + abrir()
     + cerrar()
+    + cambiarEstado()
 }
 
 class Producto {
     - idProducto : int
     - nombre : string
     - marca : string
+    + asignarTipoProducto()
 }
 
 class TipoProducto {
     - idTipo : int
     - nombreTipo : string
+    + asignarTipoProducto()
 }
 
 class Hito {
     - id : int
     - descripcion : string
     - fecha : date
+    + registrar()
 }
 
 class Mensaje {
     - id : int
     - contenido : string
     - fecha : date
+    + enviar()
 }
 
 Usuario <|-- Cliente
@@ -58,7 +63,7 @@ Cliente "1" --> "*" Ticket : crea
 Representante "1" --> "*" Ticket : atiende
 
 Ticket "1" --> "1" Producto
-Producto "*" --> "1" TipoProducto
+Producto o-- "1" TipoProducto
 
 Ticket *-- Hito
 Ticket *-- Mensaje

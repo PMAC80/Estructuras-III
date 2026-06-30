@@ -7,13 +7,9 @@ participant TipoProducto
 
 Usuario -> Producto : seleccionarProducto()
 
-Usuario -> TipoProducto : seleccionarTipo()
+Producto -> TipoProducto : asignarTipoProducto()
 
-Usuario -> Producto : asignarTipo(tipo)
-
-Producto -> TipoProducto : obtenerTipo()
-
-TipoProducto --> Producto : tipo
+TipoProducto --> Producto : tipo asignado
 
 Producto --> Usuario : confirmación
 
