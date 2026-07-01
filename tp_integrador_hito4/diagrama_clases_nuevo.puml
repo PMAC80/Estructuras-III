@@ -1,0 +1,126 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+'=========================
+' ENTIDADES
+'=========================
+
+abstract class Usuario {
+    - id : int
+    - nombre : string
+    - email : string
+    - contraseña : string
+    + iniciarSesion()
+}
+
+class Cliente {
+    + crearTicket()
+    + consultarTicket()
+}
+
+class Representante {
+    - especialidad : string
+    + responderTicket()
+    + registrarHito()
+}
+
+class Ticket {
+    - id : int
+    - descripcion : string
+    - estado : string
+    - fecha : date
+
+    + abrir()
+    + cerrar()
+    + cambiarEstado()
+    + agregarHito()
+    + agregarMensaje()
+}
+
+class Producto {
+    - idProducto : int
+    - nombre : string
+    - marca : string
+
+    + asignarTipoProducto()
+}
+
+class TipoProducto {
+    - idTipo : int
+    - nombreTipo : string
+
+    + validarTipo()
+}
+
+class Hito {
+    - id : int
+    - descripcion : string
+    - fecha : date
+
+    + registrar()
+}
+
+class Mensaje {
+    - id : int
+    - contenido : string
+    - fecha : date
+
+    + enviar()
+}
+
+'=========================
+' CONTROLADORES
+'=========================
+
+class ControlTicket <<control>> {
+    + crearTicket()
+    + cambiarEstado()
+    + asignarTipoProducto()
+    + consultarTicket()
+}
+
+class ControlHito <<control>> {
+    + registrarHito()
+    + consultarHistorial()
+}
+
+class ControlNotificaciones <<control>> {
+    + enviarMensaje()
+    + notificarCliente()
+    + notificarRepresentante()
+}
+
+'=========================
+' HERENCIA
+'=========================
+
+Usuario <|-- Cliente
+Usuario <|-- Representante
+
+'=========================
+' RELACIONES DE NEGOCIO
+'=========================
+
+Cliente "1" --> "*" Ticket : crea
+Representante "1" --> "*" Ticket : atiende
+
+Ticket *-- Hito
+Ticket *-- Mensaje
+
+Ticket "1" *-- "1" Producto
+Producto "1" o-- "1" TipoProducto
+
+'=========================
+' RELACIONES DE CONTROL
+'=========================
+
+ControlTicket --> Ticket
+ControlTicket --> Producto
+ControlTicket --> ControlHito
+ControlTicket --> ControlNotificaciones
+
+ControlHito --> Hito
+
+ControlNotificaciones --> Mensaje
+
+@enduml
