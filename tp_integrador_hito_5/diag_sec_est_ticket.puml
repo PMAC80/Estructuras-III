@@ -1,0 +1,34 @@
+@startuml
+
+actor Representante
+
+boundary GUI
+control ControlTicket
+control ControlHito
+control ControlNotificaciones
+entity Ticket
+entity Hito
+entity Mensaje
+
+Representante -> GUI : Seleccionar "Cambiar Estado"
+
+GUI -> ControlTicket : cambiarEstado(idTicket,nuevoEstado)
+
+ControlTicket -> Ticket : cambiarEstado(nuevoEstado)
+Ticket --> ControlTicket : Estado actualizado
+
+ControlTicket -> ControlHito : registrarHito(ticket, nuevoEstado)
+
+ControlHito -> Hito : crear()
+Hito --> ControlHito : Hito registrado
+
+ControlTicket -> ControlNotificaciones : notificarCliente(ticket)
+
+ControlNotificaciones -> Mensaje : crearMensaje()
+Mensaje --> ControlNotificaciones : Mensaje generado
+
+ControlTicket --> GUI : Confirmación
+
+GUI --> Representante : Estado actualizado
+
+@enduml
