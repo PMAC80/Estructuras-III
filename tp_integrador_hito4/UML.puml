@@ -1,0 +1,138 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+'=========================
+' BOUNDARY
+'=========================
+
+class GUI <<boundary>> {
+    + mostrarPantalla()
+    + capturarDatos()
+}
+
+'=========================
+' CONTROLADORES
+'=========================
+
+class ControlTicket <<control>> {
+    + crearTicket()
+    + cambiarEstado()
+    + asignarTipoProducto()
+    + consultarTicket()
+}
+
+class ControlHito <<control>> {
+    + registrarHito()
+    + consultarHistorial()
+}
+
+class ControlNotificaciones <<control>> {
+    + enviarMensaje()
+    + notificarCliente()
+    + notificarRepresentante()
+}
+
+'=========================
+' ENTIDADES
+'=========================
+
+abstract class Usuario <<entity>> {
+    - id : int
+    - nombre : string
+    - email : string
+    - contraseña : string
+
+    + iniciarSesion()
+}
+
+class Cliente <<entity>> {
+    + crearTicket()
+    + consultarTicket()
+}
+
+class Representante <<entity>> {
+    - especialidad : string
+
+    + responderTicket()
+    + registrarHito()
+}
+
+class Ticket <<entity>> {
+    - id : int
+    - descripcion : string
+    - estado : string
+    - fecha : date
+
+    + abrir()
+    + cerrar()
+    + cambiarEstado()
+    + agregarHito()
+    + agregarMensaje()
+}
+
+class Producto <<entity>> {
+    - idProducto : int
+    - nombre : string
+    - marca : string
+
+    + asignarTipoProducto()
+}
+
+class TipoProducto <<entity>> {
+    - idTipo : int
+    - nombreTipo : string
+
+    + validarTipo()
+}
+
+class Hito <<entity>> {
+    - id : int
+    - descripcion : string
+    - fecha : date
+
+    + registrar()
+}
+
+class Mensaje <<entity>> {
+    - id : int
+    - contenido : string
+    - fecha : date
+
+    + enviar()
+}
+
+'=========================
+' HERENCIA
+'=========================
+
+Usuario <|-- Cliente
+Usuario <|-- Representante
+
+'=========================
+' RELACIONES DEL NEGOCIO
+'=========================
+
+Cliente "1" --> "*" Ticket : crea
+Representante "1" --> "*" Ticket : atiende
+
+Ticket *-- Hito
+Ticket *-- Mensaje
+
+Ticket *-- Producto
+Producto o-- TipoProducto
+
+'=========================
+' RELACIONES DE DISEÑO
+'=========================
+
+GUI --> ControlTicket
+
+ControlTicket --> Ticket
+ControlTicket --> Producto
+ControlTicket --> ControlHito
+ControlTicket --> ControlNotificaciones
+
+ControlHito --> Hito
+ControlNotificaciones --> Mensaje
+
+@enduml
