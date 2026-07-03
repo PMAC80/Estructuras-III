@@ -1,0 +1,32 @@
+@startuml
+
+actor Cliente
+
+boundary GUI
+control ControlTicket
+control ControlHito
+entity Ticket
+entity Producto
+entity Hito
+
+Cliente -> GUI : Crear Ticket
+
+GUI -> ControlTicket : crearTicket(datos)
+
+ControlTicket -> Ticket : crear()
+
+ControlTicket -> Producto : asociarProducto()
+
+Producto --> ControlTicket : Producto asociado
+
+ControlTicket -> ControlHito : registrarHito(ticket)
+
+ControlHito -> Hito : crear()
+
+Hito --> ControlHito : Hito registrado
+
+ControlTicket --> GUI : Ticket creado
+
+GUI --> Cliente : Mostrar número de ticket
+
+@enduml

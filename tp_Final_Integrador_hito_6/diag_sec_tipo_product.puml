@@ -1,0 +1,33 @@
+@startuml
+
+actor Representante
+
+boundary GUI
+control ControlTicket
+control ControlHito
+entity Producto
+entity TipoProducto
+entity Hito
+
+Representante -> GUI : Asignar Tipo de Producto
+
+GUI -> ControlTicket : asignarTipoProducto(idProducto,idTipo)
+
+ControlTicket -> Producto : asignarTipoProducto()
+
+Producto -> TipoProducto : validarTipo()
+
+TipoProducto --> Producto : Tipo válido
+
+Producto --> ControlTicket : Producto actualizado
+
+ControlTicket -> ControlHito : registrarHito(producto)
+
+ControlHito -> Hito : crear()
+Hito --> ControlHito : Hito registrado
+
+ControlTicket --> GUI : Confirmación
+
+GUI --> Representante : Tipo asignado
+
+@enduml

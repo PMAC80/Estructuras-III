@@ -1,0 +1,21 @@
+@startuml
+
+actor Usuario
+
+boundary GUI
+control ControlTicket
+entity Usuario
+
+Usuario -> GUI : Ingresar usuario y contraseña
+
+GUI -> ControlTicket : iniciarSesion(usuario,password)
+
+ControlTicket -> Usuario : validarCredenciales()
+
+Usuario --> ControlTicket : Usuario válido
+
+ControlTicket --> GUI : Acceso permitido
+
+GUI --> Usuario : Mostrar menú principal
+
+@enduml
