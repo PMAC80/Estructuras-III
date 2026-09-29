@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: "Person API con SQLite"
+  description: "Una API sencilla de personas usando SQLAlchemy"
+  version: "1.0.0"
+
+servers:
+  - url: "/api"
+
+components:
+  schemas:
+    Person:
+      type: "object"
+      required:
+        - lname
+      properties:
+        fname:
+          type: "string"
+        lname:
+          type: "string"
+  parameters:
+    lname:
+      name: "lname"
+      description: "Apellido de la persona"
+      in: path
+      required: True
+      schema:
+        type: "string"
+
+paths:
+  /people:
+    get:
+      operationId: "people.read_all"
+      tags:
+        - People
+      summary: "Leer la lista de personas"
+      responses:
+        "200":
+          description: "Lista de personas obtenida correctamente"
+    post:
+      operationId: "people.create"
+      tags:
+        - People
+      summary: "Crear una persona"
+      requestBody:
+        description: "Persona a crear"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "person"
+              $ref: "#/components/schemas/Person"
+      responses:
+        "201":
+          description: "Persona creada correctamente"
+  /people/{lname}:
+    get:
+      operationId: "people.read_one"
+      tags:
+        - People
+      summary: "Leer una persona en particular"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "200":
+          description: "Persona encontrada"
+    put:
+      operationId: "people.update"
+      tags:
+        - People
+      summary: "Actualizar una persona"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-body-name: "person"
+              $ref: "#/components/schemas/Person"
+      responses:
+        "200":
+          description: "Persona actualizada correctamente"
+    delete:
+      operationId: "people.delete"
+      tags:
+        - People
+      summary: "Borrar una persona"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "204":
+          description: "Persona borrada correctamente"
