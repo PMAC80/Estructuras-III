@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  title: "RP Flask REST API One to One"
+  description: "API de personas con relación Uno a Uno a sus detalles"
+  version: "1.0.0"
+servers:
+  - url: "/api"
+components:
+  schemas:
+    PersonDetail:
+      type: "object"
+      properties:
+        bio:
+          type: "string"
+        phone:
+          type: "string"
+    Person:
+      type: "object"
+      required:
+        - lname
+      properties:
+        fname:
+          type: "string"
+        lname:
+          type: "string"
+        detail:
+          $ref: "#/components/schemas/PersonDetail"
+  parameters:
+    lname:
+      name: "lname"
+      description: "Apellido de la persona"
+      in: path
+      required: True
+      schema:
+        type: "string"
+paths:
+  /people:
+    get:
+      operationId: "people.read_all"
+      tags:
+        - People
+      summary: "Leer la lista de personas"
+      responses:
+        "200":
+          description: "Lista obtenida correctamente"
+    post:
+      operationId: "people.create"
+      tags:
+        - People
+      summary: "Crear una persona con su detalle"
+      requestBody:
+        description: "Persona y detalle a crear"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "person"
+              $ref: "#/components/schemas/Person"
+      responses:
+        "201":
+          description: "Persona creada correctamente"
+  /people/{lname}:
+    get:
+      operationId: "people.read_one"
+      tags:
+        - People
+      summary: "Leer una persona en particular"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "200":
+          description: "Persona encontrada"
+    delete:
+      operationId: "people.delete"
+      tags:
+        - People
+      summary: "Borrar una persona (y su detalle en cascada)"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "204":
+          description: "Persona borrada correctamente"
+          

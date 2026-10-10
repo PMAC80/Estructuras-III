@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>RP Flask REST API One to One</title>
+</head>
+<body>
+    <h1>Hello, People with Details!</h1>
+    <ul>
+        {% for person in people %}
+        <li>
+            <strong>{{ person.fname }} {{ person.lname }}</strong> 
+            - Bio: {{ person.detail.bio if person.detail else 'Sin detalle' }} 
+            - Tel: {{ person.detail.phone if person.detail else 'N/A' }}
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
