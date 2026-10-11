@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: "TP One to Many - Clientes y Pedidos"
+  description: "API de clientes con relación Uno a Muchos a sus pedidos"
+  version: "1.0.0"
+servers:
+  - url: "/api"
+components:
+  schemas:
+    Order:
+      type: "object"
+      properties:
+        order_number:
+          type: "string"
+        amount:
+          type: "number"
+    Customer:
+      type: "object"
+      required:
+        - name
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+        orders:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Order"
+  parameters:
+    name:
+      name: "name"
+      description: "Nombre del cliente"
+      in: path
+      required: True
+      schema:
+        type: "string"
+paths:
+  /customers:
+    get:
+      operationId: "customers.read_all"
+      tags:
+        - Customers
+      summary: "Leer la lista de clientes"
+      responses:
+        "200":
+          description: "Lista obtenida correctamente"
+    post:
+      operationId: "customers.create"
+      tags:
+        - Customers
+      summary: "Crear un cliente con sus pedidos"
+      requestBody:
+        description: "Cliente y pedidos a crear"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "customer"
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "201":
+          description: "Cliente creado correctamente"
+  /customers/{name}:
+    get:
+      operationId: "customers.read_one"
+      tags:
+        - Customers
+      summary: "Leer un cliente en particular"
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "200":
+          description: "Cliente encontrado"
+    delete:
+      operationId: "customers.delete"
+      tags:
+        - Customers
+      summary: "Borrar un cliente (y sus pedidos en cascada)"
+      parameters:
+        - $ref: "#/components/parameters/name"
+      responses:
+        "204":
+          description: "Cliente borrado correctamente"

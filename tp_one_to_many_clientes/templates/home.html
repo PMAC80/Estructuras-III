@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TP One to Many - Clientes y Pedidos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        .cliente { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .cliente h2 { color: #0056b3; margin-top: 0; }
+        .pedido { background: #e9ecef; padding: 10px; margin: 5px 0; border-left: 4px solid #28a745; }
+        .sin-pedidos { color: #dc3545; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>📦 Sistema de Clientes y Pedidos (Relación 1:N)</h1>
+
+    <!-- Bucle externo: Recorremos la lista de CLIENTES (El "Uno") -->
+    {% for customer in customers %}
+    <div class="cliente">
+        <h2> {{ customer.name }} ({{ customer.email }})</h2>
+        
+        <!-- Bucle interno: Recorremos la lista de PEDIDOS de este cliente (El "Muchos") -->
+        {% if customer.orders %}
+            <h3>Pedidos realizados:</h3>
+            {% for order in customer.orders %}
+            <div class="pedido">
+                <strong>Pedido N°:</strong> {{ order.order_number }} | 
+                <strong>Monto:</strong> ${{ order.amount }}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="sin-pedidos">Este cliente aún no tiene pedidos.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+</body>
+</html>
