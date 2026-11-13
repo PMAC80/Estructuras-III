@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmos III - Módulo 2: Interfaz de Inteligencia</title>
+    <!-- Bibliotecas de Visualización y Estilo -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #f5f5f7;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --glass: rgba(255, 255, 255, 0.85);
+            --transition-speed: 0.7s;
+            --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: white;
+            color: var(--apple-black);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Snap Scroll Engine */
+        .presentation-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            position: relative;
+            background: white;
+        }
+
+        /* Nav Glassmorphism */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: var(--glass);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto; padding: 0 30px; height: 52px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            text-decoration: none; color: var(--apple-black); font-size: 0.75rem;
+            font-weight: 500; opacity: 0.6; transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--apple-blue); }
+
+        /* Progress Dots */
+        .dots-menu {
+            position: fixed; right: 30px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 12px; z-index: 1000;
+        }
+        .dot {
+            width: 8px; height: 8px; background: rgba(0,0,0,0.1);
+            border-radius: 50%; cursor: pointer; transition: 0.4s var(--transition-curve);
+        }
+        .dot.active { background: var(--apple-blue); transform: scale(1.5); }
+
+        /* Slide Content Structure */
+        .slide-content {
+            max-width: 1300px; width: 100%;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 60px; align-items: center;
+            opacity: 0; transform: translateY(50px);
+            transition: all 0.8s var(--transition-curve);
+        }
+        section.visible .slide-content { opacity: 1; transform: translateY(0); }
+
+        .full-width { grid-column: 1 / -1; text-align: center; }
+
+        h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1.1; margin: 0; }
+        h2 { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 20px; }
+        h3 { font-size: 1.4rem; font-weight: 600; color: var(--apple-blue); margin-bottom: 15px; }
+        p { font-size: 1.15rem; line-height: 1.7; color: #424245; }
+
+        .tag {
+            text-transform: uppercase; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.15em; color: var(--apple-gray); margin-bottom: 15px; display: block;
+        }
+
+        /* Aesthetic Enhancements */
+        .card {
+            background: var(--apple-bg); border-radius: 32px; padding: 35px;
+            border: 1px solid rgba(0,0,0,0.03); text-align: left; transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+
+        .img-wrapper {
+            width: 100%; height: 500px; background: #eee; border-radius: 40px;
+            overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .img-wrapper:hover img { transform: scale(1.05); }
+
+        /* MEGA DIAGRAM CONTAINER - VISIBILIDAD GIGANTE */
+        .diagram-container-massive {
+            width: 100%;
+            height: 75vh;
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.02);
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid var(--apple-bg);
+            overflow: visible;
+        }
+        
+        .mermaid-wrapper-massive {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(1.1); /* Zoom adicional */
+        }
+
+        /* Quiz Styling */
+        .quiz-option {
+            background: white; padding: 20px; border-radius: 15px; border: 2px solid var(--apple-bg);
+            cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+        .quiz-option:hover { border-color: var(--apple-blue); background: #fbfbfd; }
+        .quiz-option.correct { background: #e8f5e9; border-color: #34c759; color: #1b5e20; }
+        .quiz-option.wrong { background: #ffebee; border-color: #ff3b30; color: #b71c1c; }
+
+        /* Gemini Interface */
+        .gemini-btn {
+            position: fixed; bottom: 35px; right: 35px; background: var(--gemini-gradient);
+            width: 68px; height: 68px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; color: white; cursor: pointer; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            z-index: 1100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gemini-btn:hover { transform: scale(1.15) rotate(5deg); }
+
+        #geminiModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.35); backdrop-filter: blur(28px); z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+        .modal-card {
+            background: white; width: 92%; max-width: 800px; border-radius: 40px;
+            padding: 45px; position: relative; box-shadow: 0 50px 120px rgba(0,0,0,0.25);
+        }
+
+        /* Animations */
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 1100px) {
+            .slide-content { grid-template-columns: 1fr; gap: 40px; }
+            .img-wrapper { height: 320px; }
+            .diagram-container-massive { height: auto; min-height: 400px; }
+            .mermaid-wrapper-massive { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">AED III - Módulo 2: Interfaz de Inteligencia</div>
+            <div class="nav-links">
+                <a href="#intro">Inicio</a>
+                <a href="#teoria">LSP & AST</a>
+                <a href="#arquitectura">Flujo</a>
+                <a href="#config">YAML</a>
+                <a href="#evaluacion">Examen</a>
+                <a href="#cierre">Sankalpa</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dots-menu" id="dotNav"></div>
+
+    <div class="presentation-container" id="deck">
+        
+        <!-- SLIDE 1: INTRODUCCIÓN - METAMORFOSIS -->
+        <section id="intro">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Módulo 2: El Entorno Potenciado</span>
+                    <h1>La Nueva Era del IDE</h1>
+                    <p>Programar ya no es un acto lineal de escritura. Hoy, trascendemos la interfaz para orquestar un ecosistema donde el editor es un colaborador cognitivo de nivel industrial.</p>
+                    <div class="card" style="margin-top: 25px;">
+                        <p><strong>De "Coder" a Arquitecto:</strong> Pasamos de pelearnos con la sintaxis a gestionar la intención algorítmica.</p>
+                    </div>
+                </div>
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=1200" alt="Espacio de trabajo de ingeniería">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: LSP & AST - FUNDAMENTOS EXHAUSTIVOS -->
+        <section id="teoria">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200" alt="Líneas de código fluyendo">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Teoría de Compiladores e IA</span>
+                    <h2>Language Server Protocol (LSP)</h2>
+                    <p>La IA no lee texto plano; interactúa con el IDE mediante el **LSP**, un protocolo JSON-RPC que expone el **AST (Abstract Syntax Tree)** del código.</p>
+                    <div class="card" style="margin-top: 25px;">
+                        <h3>¿Cómo potencia a la IA?</h3>
+                        <ul>
+                            <li><strong>Análisis Estructural:</strong> El editor identifica tipos, herencias y firmas de métodos en C++, Java o Python.</li>
+                            <li><strong>Inyección Semántica:</strong> Continue.dev consume esta estructura para que la IA no "adivine", sino que "sepa" por su posición en el grafo del lenguaje.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: SEGURIDAD DIGITAL Y SOBERANÍA -->
+        <section id="seguridad">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Soberanía de Datos</span>
+                    <h2>Seguridad Digital en la IA Local</h2>
+                    <p>En el Módulo 2, la integración es profunda. Al conectar VS Code con Ollama, garantizamos que el perímetro de seguridad nunca se rompa. Tu Propiedad Intelectual permanece en el disco local.</p>
+                </div>
+                <div class="img-wrapper">
+                    <!-- Imagen de Seguridad Digital Solicitada -->
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1200" alt="Seguridad Digital">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: MEGA FLUJO DE INFORMACIÓN (VISIBILIDAD MÁXIMA) -->
+        <section id="arquitectura">
+            <div class="slide-content full-width">
+                <span class="tag">Arquitectura Técnica de Alto Nivel</span>
+                <h2 style="font-size: 2.2rem;">Ciclo de Vida de una Consulta: IDE ↔ Agente ↔ Inferencia</h2>
+                
+                <div class="diagram-container-massive">
+                    <div class="mermaid-wrapper-massive">
+                        <div class="mermaid">
+                            graph LR
+                                subgraph "CAPA DE USUARIO (VS CODE)"
+                                    A[Editor: Acción del Desarrollador] -->|1. Intención: @codebase| B(Agente Continue)
+                                end
+                                subgraph "CAPA DE ORQUESTACIÓN (LOGIC)"
+                                    B -->|2. Análisis AST / LSP| C{Context Providers}
+                                    C -->|3. RAG / Búsqueda Vectorial| D[Embeddings Locales]
+                                    D -->|4. Prompt Estructurado| E[Constructor de Prompt]
+                                end
+                                subgraph "CAPA DE INFERENCIA (HARDWARE LOCAL)"
+                                    E -->|5. HTTP REST / JSON| F[Ollama Server]
+                                    F -->|6. Carga de Pesos| G[VRAM / GPU Hardware]
+                                    G -->|7. Predicción Probabilística| F
+                                end
+                                F -->|8. Respuesta Parcial / Stream| B
+                                B -->|9. Inserción Ghost Text| A
+                                
+                                %% Configuración de Estilos Gigantes
+                                style B fill:#0071e3,color:#fff,stroke-width:10px
+                                style G fill:#d96570,color:#fff,stroke-width:6px
+                                style A fill:#f5f5f7,stroke:#1d1d1f,stroke-width:4px
+                                style F fill:#34c759,color:#fff,stroke-width:6px
+                                style C fill:#fff,stroke:#0071e3,stroke-width:5px
+                                style D fill:#e5e5e7,stroke-width:3px
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 60px; text-align: left; margin-top: 30px;">
+                    <p style="font-size: 1.2rem; color: #424245;"><strong>Paso 3 - El Filtro Semántico:</strong> El agente busca fragmentos semánticamente cercanos en la base vectorial local para no saturar la Ventana de Contexto de la IA.</p>
+                    <p style="font-size: 1.2rem; color: #424245;"><strong>Paso 8 - Streaming de Tokens:</strong> Permite que el desarrollador vea la respuesta letra por letra, permitiendo correcciones en tiempo real.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: HARDWARE PERFORMANCE -->
+        <section id="performance">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <!-- Imagen de Hardware Performance Solicitada -->
+                    <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=1200" alt="Hardware Performance">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Métricas de Ingeniería</span>
+                    <h2>Hardware Performance</h2>
+                    <p>La integración fluida depende del Bus de datos. En el Módulo 2, entendemos que la latencia del IDE está directamente ligada a la velocidad de transferencia entre la CPU y la VRAM.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: EL ARCHIVO CONFIG.YAML -->
+        <section id="config">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Control Maestro</span>
+                    <h2>config.yaml: El Cerebro</h2>
+                    <p>En Algoritmos III, optimizar recursos es ley. El archivo YAML permite definir la orquestación de múltiples modelos de forma legible y escalable.</p>
+                    <div class="card" style="margin-top: 25px; border-left: 4px solid var(--apple-blue);">
+                        <h3>Configuración Dual:</h3>
+                        <p>Separamos el razonamiento (Chat) de la rapidez (Autocomplete). Un ingeniero asigna el modelo correcto a la tarea correcta.</p>
+                    </div>
+                </div>
+                <div class="code-window">
+<pre style="margin:0;"><span style="color:#6a9955"># Configuración Módulo 2</span>
+models:
+  - title: <span style="color:#ce9178">"Qwen Coder 7B"</span>
+    provider: <span style="color:#ce9178">"ollama"</span>
+    model: <span style="color:#ce9178">"qwen2.5-coder:7b"</span>
+tabAutocompleteModel:
+  title: <span style="color:#ce9178">"Fast Auto-Complete"</span>
+  provider: <span style="color:#ce9178">"ollama"</span>
+  model: <span style="color:#ce9178">"qwen2.5-coder:1.5b"</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: DATA CENTER MODERNO (EL CONTEXTO) -->
+        <section id="datacenter">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Contexto Industrial</span>
+                    <h2>Data Center Moderno</h2>
+                    <p>Aunque corramos Ollama localmente, la arquitectura emula la de un Data Center distribuido. El Módulo 2 nos enseña a gestionar estos recursos como si tuviéramos un cluster propio.</p>
+                </div>
+                <div class="img-wrapper">
+                    <!-- Imagen de Data Center Moderno Solicitada -->
+                    <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=1200" alt="Data Center Moderno">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: MICROCHIPS Y CUANTIZACIÓN -->
+        <section id="microchips">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <!-- Imagen de Microchips de Silicio Solicitada -->
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200" alt="Microchips de Silicio">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Nivel de Silicio</span>
+                    <h2>Microchips de Silicio</h2>
+                    <p>La integración del Módulo 2 depende de la eficiencia. La cuantización GGUF permite que billones de parámetros de silicio se carguen en hardware de consumo sin perder la lógica algorítmica.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: BIBLIOTECA DIGITAL (RAG) -->
+        <section id="biblioteca">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Estrategias de Memoria</span>
+                    <h2>Biblioteca Digital (RAG)</h2>
+                    <p>El agente utiliza el concepto de Biblioteca Digital Infinita. Mediante el indexado vectorial, puede "leer" miles de archivos y traer solo el fragmento exacto que necesitas en ese milisegundo.</p>
+                </div>
+                <div class="img-wrapper">
+                    <!-- Imagen de Biblioteca Digital Solicitada -->
+                    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=1200" alt="Biblioteca Digital">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: LABORATORIO INTERACTIVO ✨ -->
+        <section id="lab">
+            <div class="slide-content full-width">
+                <span class="tag">Taller Práctico ✨</span>
+                <h2 style="background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">Laboratorio de Orquestación YAML</h2>
+                <div class="tool-panel" style="max-width: 900px; margin: 40px auto;">
+                    <p style="margin-bottom: 20px;">Dinos qué modelos descargaste en Ollama y Gemini construirá tu bloque YAML de orquestación óptimo para Ingeniería:</p>
+                    <input type="text" id="modelsIn" class="tool-input" placeholder="Ej: qwen2.5-coder:7b y starcoder2:3b">
+                    <button class="btn-tool" onclick="genYaml()"><i data-lucide="cog"></i> Generar Bloque config.yaml</button>
+                    <div id="yamlOut" class="code-window" style="display:none; margin-top:30px; max-height: 250px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: EVALUACIÓN INTERACTIVA - MÓDULO 2 -->
+        <section id="evaluacion">
+            <div class="slide-content full-width">
+                <span class="tag">Validación de Conocimiento</span>
+                <h2>Simulador de Examen: Módulo 2</h2>
+                <div id="quizContainer" class="card" style="max-width: 800px; margin: 0 auto; text-align: center;">
+                    <h3 id="quizQuestion" style="font-size: 1.6rem; margin-bottom: 30px;">¿Cargando pregunta técnica...?</h3>
+                    <div id="quizOptions" style="display: grid; gap: 15px; text-align: left;"></div>
+                    <div id="quizFeedback" style="margin-top: 30px; font-weight: 600; display: none;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: CIERRE CONCEPTUAL - REFLEXIÓN (SANKALPA) -->
+        <section id="cierre">
+            <div class="slide-content full-width">
+                <span class="tag">Jose Luis Oemig / Sankalpa</span>
+                <h1>Ingeniería con Intención</h1>
+                <div class="img-wrapper" style="height: 300px; max-width: 650px; margin: 30px auto; border-radius: 50%;">
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200" alt="Equilibrio y Claridad">
+                </div>
+                <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                    <p>Configurar tu entorno no es una tarea administrativa; es preparar tu templo de creación. Un entorno alineado con tu **Sankalpa** (intención consciente) permite que el algoritmo fluya sin resistencia.</p>
+                    <div class="card" style="margin-top: 30px; background: white;">
+                        <h3 style="color: var(--apple-black); font-size: 1.5rem;">Reflexión Final:</h3>
+                        <p style="font-style: italic;">¿Eres quien escribe el código o quien diseña la orquestación que lo genera? La soberanía tecnológica es soberanía sobre tu propio pensamiento.</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('deck').scrollTo({top:0, behavior:'smooth'})" style="margin-top: 50px; padding:15px 40px; border-radius:30px; border:none; background:var(--apple-black); color:white; font-weight:700; cursor:pointer;">Finalizar Módulo</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Gemini Floating Consultant -->
+    <div class="gemini-btn" onclick="toggleModal()"><i data-lucide="sparkles"></i></div>
+
+    <!-- Modal Gemini -->
+    <div id="geminiModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.6rem;"><i data-lucide="bot" style="vertical-align:middle; margin-right:12px; color:var(--apple-blue);"></i> Consultor Académico</h2>
+                <i data-lucide="x" onclick="toggleModal()" style="cursor:pointer; opacity:0.3;"></i>
+            </div>
+            <p style="color:var(--apple-gray); margin-top:10px;">Consulta técnica profunda sobre el Módulo 2.</p>
+            <input type="text" id="chatInput" style="width:100%; padding:20px; border:1px solid #d2d2d7; border-radius:18px; font-size:1.1rem; margin:20px 0; outline: none;" placeholder="Ej: ¿Qué papel juega el RAG en Continue.dev?" onkeypress="if(event.key==='Enter') askGemini()">
+            <button onclick="askGemini()" id="sendBtn" style="width:100%; padding:18px; border-radius:15px; border:none; background:var(--apple-blue); color:white; font-weight:700; cursor:pointer;">Consultar a Gemini</button>
+            <div id="chatResponse" style="margin-top:20px; display:none; background:#f5f5f7; padding:20px; border-radius:15px; max-height:350px; overflow-y:auto; text-align:left;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mermaid Initialization with MASSIVE fonts
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'neutral', 
+            fontFamily: 'Inter', 
+            fontSize: 32, // FUENTE GIGANTE PARA NODOS
+            useMaxWidth: false,
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 60,
+                rankSpacing: 120,
+                nodeSpacing: 100
+            },
+            themeVariables: {
+                fontSize: '32px', 
+                labelFontSize: '28px', 
+                titleFontSize: '38px' 
+            }
+        });
+        
+        lucide.createIcons();
+
+        // Dots & Navigation Tracking
+        const deck = document.getElementById('deck');
+        const sections = document.querySelectorAll('section');
+        const dotNav = document.getElementById('dotNav');
+
+        sections.forEach((s, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.dataset.target = s.id;
+            dot.onclick = () => {
+                const target = document.getElementById(dot.dataset.target);
+                deck.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+            };
+            dotNav.appendChild(dot);
+        });
+
+        deck.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => {
+                if (deck.scrollTop >= s.offsetTop - 100) current = s.id;
+            });
+            sections.forEach(s => s.classList.toggle('visible', s.id === current));
+            document.querySelectorAll('.dot').forEach(d => d.classList.toggle('active', d.dataset.target === current));
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+        });
+
+        // Gemini API Configuration
+        const apiKey = ""; 
+        const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        async function apiCall(prompt, system) {
+            try {
+                const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
+                });
+                const data = await res.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { return "Error de conexión con el motor socrático."; }
+        }
+
+        async function genYaml() {
+            const input = document.getElementById('modelsIn').value.trim();
+            const resArea = document.getElementById('yamlOut');
+            if(!input) return;
+            resArea.style.display = 'block';
+            resArea.innerHTML = '<span class="loader">Analizando orquestación técnica</span>';
+            try {
+                const text = await apiCall(`Genera config.yaml para estos modelos de Ollama: ${input}. Separa modelos de chat (>7B) de modelos de autocomplete (<=3B). Devuelve SOLO el código YAML sin markdown.`, "Eres un experto en orquestación de IDEs con IA.");
+                resArea.innerText = text.trim();
+            } catch(e) { resArea.innerText = "Fallo al generar configuración local."; }
+        }
+
+        function toggleModal() {
+            const m = document.getElementById('geminiModal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') document.getElementById('chatInput').focus();
+        }
+
+        async function askGemini() {
+            const i = document.getElementById('chatInput');
+            const r = document.getElementById('chatResponse');
+            const btn = document.getElementById('sendBtn');
+            const q = i.value.trim();
+            if(!q) return;
+
+            btn.disabled = true;
+            btn.innerHTML = 'Generando Tokens<span class="loader"></span>';
+            r.style.display = 'block';
+            r.innerHTML = '<em>Consultando la base universitaria y socrática...</em>';
+
+            const system = `Eres Jose Luis Oemig, docente de Algoritmos III. Resume los temas del Módulo 2 de forma socrática y técnica.
+            Explica detalladamente config.yaml, RAG local y LSP. Tu tono es profesional, motivador y docente.`;
+
+            try {
+                const text = await apiCall(q, system);
+                r.innerText = text;
+            } catch (e) { r.innerText = "Error de conexión con la IA."; }
+            finally {
+                btn.disabled = false;
+                btn.innerText = "Consultar a Gemini";
+            }
+        }
+
+        // Quiz Logic Módulo 2
+        const quizData = [
+            {
+                q: "¿Qué protocolo permite a VS Code exponer la estructura del código a la IA?",
+                o: ["HTTP 2.0", "LSP (Language Server Protocol)", "FTP", "REST"],
+                c: 1
+            },
+            {
+                q: "¿Cuál es la función del RAG Local en Continue.dev?",
+                o: ["Optimizar la GPU", "Filtrar fragmentos relevantes del código", "Compilar C++", "Guardar contraseñas"],
+                c: 1
+            }
+        ];
+        let currentQuiz = 0;
+        function loadQuiz() {
+            const q = quizData[currentQuiz];
+            document.getElementById('quizQuestion').innerText = q.q;
+            const container = document.getElementById('quizOptions');
+            container.innerHTML = "";
+            q.o.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = "quiz-option";
+                div.innerText = opt;
+                div.onclick = () => checkQuiz(i);
+                container.appendChild(div);
+            });
+        }
+        function checkQuiz(idx) {
+            const q = quizData[currentQuiz];
+            const options = document.querySelectorAll('.quiz-option');
+            const feedback = document.getElementById('quizFeedback');
+            feedback.style.display = "block";
+            if(idx === q.c) {
+                options[idx].classList.add('correct');
+                feedback.innerText = "¡Correcto! Has dominado el concepto.";
+                feedback.style.color = "#34c759";
+                setTimeout(() => {
+                    currentQuiz = (currentQuiz + 1) % quizData.length;
+                    feedback.style.display = "none";
+                    loadQuiz();
+                }, 2000);
+            } else {
+                options[idx].classList.add('wrong');
+                feedback.innerText = "Reintenta. Recuerda la arquitectura de orquestación.";
+                feedback.style.color = "#ff3b30";
+            }
+        }
+
+        sections[0].classList.add('visible');
+        loadQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmos III - La Revolución de la IA Local</title>
+    <!-- Bibliotecas de Visualización y Estilo -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #f5f5f7;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --glass: rgba(255, 255, 255, 0.85);
+            --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: white;
+            color: var(--apple-black);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Snap Scroll Engine */
+        .presentation-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            position: relative;
+            background: white;
+        }
+
+        /* Navigation Glass */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: var(--glass);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            height: 52px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo { font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--apple-black);
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--apple-blue); }
+
+        /* Sidebar Dots Navigation */
+        .dots-menu {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+        .dot {
+            width: 8px; height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.4s var(--transition-curve);
+        }
+        .dot.active { background: var(--apple-blue); transform: scale(1.5); }
+
+        /* Slide Content Layouts */
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s var(--transition-curve);
+        }
+        section.visible .slide-content { opacity: 1; transform: translateY(0); }
+
+        .full-width { grid-column: 1 / -1; text-align: center; }
+
+        h1 { font-size: clamp(2.5rem, 7vw, 4.8rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1.1; margin: 0; }
+        h2 { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 20px; }
+        h3 { font-size: 1.4rem; font-weight: 600; color: var(--apple-blue); margin-bottom: 12px; }
+        p { font-size: 1.15rem; line-height: 1.6; color: #424245; }
+
+        .tag {
+            text-transform: uppercase;
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
+            color: var(--apple-gray); margin-bottom: 15px; display: block;
+        }
+
+        /* Aesthetic Cards & Images */
+        .card {
+            background: var(--apple-bg);
+            border-radius: 32px;
+            padding: 35px;
+            border: 1px solid rgba(0,0,0,0.03);
+            text-align: left;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card:hover { transform: translateY(-8px); }
+
+        .img-wrapper {
+            width: 100%;
+            height: 480px;
+            background: #f0f0f2;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+            position: relative;
+        }
+        .img-wrapper img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.6s ease;
+        }
+        .img-wrapper:hover img { transform: scale(1.04); }
+
+        /* Tools & Results */
+        .code-window {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 24px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            text-align: left;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 1px solid #333;
+        }
+
+        .tool-panel {
+            background: white;
+            border-radius: 28px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+            text-align: left;
+            border: 1px solid var(--apple-bg);
+        }
+
+        .tool-input {
+            width: 100%; padding: 16px; border: 1px solid #d2d2d7; border-radius: 14px;
+            font-size: 1rem; margin-bottom: 15px; outline: none; transition: border-color 0.3s;
+        }
+
+        .btn-tool {
+            background: var(--apple-black); color: white; border: none; padding: 16px 28px;
+            border-radius: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center;
+            gap: 12px; transition: background 0.3s;
+        }
+        .btn-tool:hover { background: #333; }
+
+        .result-area {
+            margin-top: 20px; padding: 18px; background: #f8f8fa; border-radius: 14px;
+            font-family: 'Fira Code', monospace; font-size: 0.85rem; display: none;
+            white-space: pre-wrap; border: 1px dashed #d2d2d7; max-height: 200px; overflow-y: auto;
+        }
+
+        /* Workflow Comparison */
+        .workflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
+        .wf-label { font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--apple-gray); margin-bottom: 15px; }
+
+        /* Gemini Floating Interface */
+        .gemini-btn {
+            position: fixed; bottom: 35px; right: 35px; background: var(--gemini-gradient);
+            width: 68px; height: 68px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; color: white; cursor: pointer; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            z-index: 1100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gemini-btn:hover { transform: scale(1.15) rotate(5deg); }
+
+        #geminiModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.35); backdrop-filter: blur(28px); z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+        .modal-card {
+            background: white; width: 92%; max-width: 800px; border-radius: 40px;
+            padding: 45px; position: relative; box-shadow: 0 50px 120px rgba(0,0,0,0.25);
+        }
+
+        /* Text Effects */
+        .gradient-text { background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+        .pulse { animation: pulse 2.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 1100px) {
+            .slide-content { grid-template-columns: 1fr; gap: 40px; }
+            .img-wrapper { height: 320px; }
+            h1 { font-size: 3rem; }
+            .workflow-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">Algoritmos III - La Nueva Ingeniería</div>
+            <div class="nav-links">
+                <a href="#intro1">Metamorfosis</a>
+                <a href="#slide6">Arquitectura</a>
+                <a href="#slide15">Laboratorio</a>
+                <a href="#slide20">Cierre</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dots-menu" id="dotNav"></div>
+
+    <div class="presentation-container" id="deck">
+        
+        <!-- INTRO 1: METAMORFOSIS HISTÓRICA -->
+        <section id="intro1">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Un cambio de era</span>
+                    <h2>La Gran Metamorfosis</h2>
+                    <p>Durante décadas, programar fue un acto de artesanía manual lineal. Hoy, trascendemos la sintaxis para entrar en la era de la **Ingeniería de Intención**, donde el humano orquesta y la IA ejecuta.</p>
+                </div>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200" alt="Metamorfosis Digital">
+                </div>
+            </div>
+        </section>
+
+        <!-- INTRO 2: ARQUITECTURA DE SOFTWARE -->
+        <section id="intro2">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200" alt="Arquitectura de Software">
+                </div>
+                <div class="text-side">
+                    <span class="tag">De Operativo a Estratégico</span>
+                    <h2>De "Coders" a "Arquitectos"</h2>
+                    <p>Pasamos de depurar punteros durante horas a diseñar soluciones de alto nivel. El foco ya no está en *cómo* escribir una función, sino en *qué* valor aporta al sistema global.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTRO 3: EQUIPOS AUMENTADOS -->
+        <section id="intro3">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Transformación Humana</span>
+                    <h2>Equipos Aumentados</h2>
+                    <p>El ecosistema de trabajo mutó: el programador Senior ahora es un **Arquitecto de Contexto**. Los equipos son más pequeños, pero su capacidad de resolución es 10 veces mayor.</p>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=400" style="width:100%; border-radius:18px; margin-bottom:15px;" alt="Colaboración de Equipos">
+                    <h3>Impacto 2026</h3>
+                    <p>• Ciclos de entrega ultra-rápidos.<br>• Calidad de código garantizada.<br>• Soberanía total local.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 1: HERO IA LOCAL -->
+        <section id="slide1">
+            <div class="slide-content full-width">
+                <span class="tag">Unidad 7 · Facultad de Ingeniería</span>
+                <h1>Soberanía Técnica Local</h1>
+                <p>Donde la privacidad y la potencia se unen en tu hardware.</p>
+                <div class="img-wrapper" style="height: 350px; max-width: 900px; margin: 40px auto;">
+                    <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1400" alt="IA Generativa">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: IA COMO RAZONADOR -->
+        <section id="slide2">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Teoría de Modelos</span>
+                    <h2>IA como Razonador</h2>
+                    <p>Un LLM no es una base de datos; es un motor de inferencia probabilística basado en **Transformers**.</p>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=400" style="width:100%; border-radius:20px; margin-bottom:15px;" alt="Redes Neuronales">
+                    <h3>Self-Attention</h3>
+                    <p>Mecánica que pondera la relevancia de cada fragmento de código simultáneamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: SEGURIDAD DIGITAL -->
+        <section id="slide3">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <!-- [Image of Seguridad Digital] -->
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1200" alt="Seguridad Digital">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Seguridad de Datos</span>
+                    <h2>Privacidad de Datos</h2>
+                    <p>Al ejecutar modelos locales, garantizamos que el código fuente nunca sea enviado a servidores externos. Protección absoluta de IP.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: HARDWARE PERFORMANCE -->
+        <section id="slide4">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Potencia Local</span>
+                    <h2>Hardware Performance</h2>
+                    <p>En un entorno local, la latencia es determinística. No dependemos de micro-interrupciones de red ni de cuotas de proveedores.</p>
+                </div>
+                <div class="card">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=400" style="width:100%; border-radius:20px; margin-bottom:15px;" alt="GPU Performance">
+                    <h3>Tokens por Segundo</h3>
+                    <p>Inferencia directa en GPU/NPU a <100ms, fluyendo a la velocidad del pensamiento.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: CAPEX VS OPEX -->
+        <section id="slide5">
+            <div class="slide-content full-width">
+                <span class="tag">Inversión Técnica</span>
+                <h2>Economía de la IA</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px;">
+                    <div class="card">
+                        <i data-lucide="server" style="color:var(--apple-blue); width:40px; height:40px; margin-bottom:15px;"></i>
+                        <h3>IA en Nube (OPEX)</h3>
+                        <p>Pago recurrente por token. Dependencia estratégica y riesgos de privacidad.</p>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="cpu" style="color:var(--apple-blue); width:40px; height:40px; margin-bottom:15px;"></i>
+                        <h3>IA Local (CAPEX)</h3>
+                        <p>Inversión única en hardware. Costo operativo marginal y uso privado ilimitado.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: ARQUITECTURA -->
+        <section id="slide6">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Infraestructura</span>
+                    <h2>Ecosistema Desacoplado</h2>
+                    <p>Arquitectura cliente-servidor donde el IDE es la interfaz de diálogo y Ollama es el motor de razonamiento puro.</p>
+                </div>
+                <div class="card">
+                    <div class="mermaid">
+                        graph TD
+                            U[VS Code + Continue] -->|REST API| O[Ollama Server]
+                            O -->|Pesos GGUF| V[GPU / VRAM]
+                            V -->|Tokens| U
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: DATA CENTER MODERNO (ORQUESTADOR) -->
+        <section id="slide7">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <!-- [Image of Data Center Moderno] CORREGIDA -->
+                    <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=1200" alt="Data Center Moderno">
+                </div>
+                <div class="text-side">
+                    <span class="tag">El Motor Industrial</span>
+                    <h2>Ollama Server</h2>
+                    <p>Ollama abstrae la complejidad de la carga de tensores y la gestión de memoria unificada. Proporciona la escala industrial en tu laptop.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: QWEN2.5-CODER -->
+        <section id="slide8">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Especialización</span>
+                    <h2>Modelos Coder</h2>
+                    <p>Entrenados en billones de líneas de código. Entienden C++ y Python con precisión sintáctica industrial superior.</p>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=400" style="width:100%; border-radius:20px; margin-bottom:15px;" alt="Programación Avanzada">
+                    <h3>Precisión C++</h3>
+                    <p>Detección de punteros nulos y optimización de complejidad algorítmica.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: MICROCHIPS DE SILICIO (OPTIMIZACIÓN) -->
+        <section id="slide9">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <!--  CORREGIDA -->
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200" alt="Microchips de Silicio">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Eficiencia en el Silicio</span>
+                    <h2>Cuantización GGUF</h2>
+                    <p>Técnica de compresión que reduce pesos (ej. 16-bit a 4-bit) para que modelos masivos quepan en hardware doméstico.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: CONTEXT WINDOW -->
+        <section id="slide10">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Limitación Crítica</span>
+                    <h2>Ventana de Contexto</h2>
+                    <p>Representa la memoria asociativa de corto plazo. Es el recurso más valioso en la ingeniería de prompts asistida.</p>
+                </div>
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&q=80&w=400" style="width:100%; border-radius:20px; margin-bottom:15px;" alt="Gestión de Memoria">
+                    <h3>Impacto de Tokens</h3>
+                    <p>La IA "olvidará" las definiciones si saturamos los tokens disponibles en la consulta.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: TOKENIZACIÓN -->
+        <section id="slide11">
+            <div class="slide-content">
+                <div class="card">
+                    <i data-lucide="binary" style="color:var(--apple-blue); width:48px; height:48px; margin-bottom:15px;"></i>
+                    <h3>¿Qué es un Token?</h3>
+                    <p>La unidad mínima semántica. 1.000 tokens ≈ 750 palabras. Espacios y tabulaciones también consumen este recurso.</p>
+                </div>
+                <div class="text-side">
+                    <span class="tag">Mecánica</span>
+                    <h2>Ingeniería de Contexto</h2>
+                    <p>Aprenderemos a seleccionar solo el código relevante para mantener precisión lógica absoluta.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: BIBLIOTECA DIGITAL (RAG) -->
+        <section id="slide12">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Estrategias RAG</span>
+                    <h2>RAG Local</h2>
+                    <p>Recuperación Aumentada por Generación: Buscamos en el índice vectorial y traemos solo el contexto necesario.</p>
+                </div>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=1200" alt="Biblioteca Digital">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: CONFIGURACIÓN YAML -->
+        <section id="slide13">
+            <div class="slide-content">
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80&w=800" alt="Código Fuente YAML">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Implementación</span>
+                    <h2>config.yaml</h2>
+                    <p>El sistema nervioso de Continue.dev. Orquestación total de modelos de chat y autocompletado en tiempo real.</p>
+                    <div class="code-window" style="margin-top:20px;">
+                        <pre>models:
+  - title: Qwen Local
+    provider: ollama
+    model: qwen2.5-coder:7b</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: CASOS DE USO REALES -->
+        <section id="slide14">
+            <div class="slide-content full-width">
+                <span class="tag">Laboratorio Profesional</span>
+                <h2>IA en el Ciclo de Vida</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-top: 40px;">
+                    <div class="card">
+                        <i data-lucide="refresh-cw" style="color:var(--apple-blue); margin-bottom:15px;"></i>
+                        <h3>Refactorización</h3>
+                        <p>Eliminación de deuda técnica algorítmica en milisegundos.</p>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="bug" style="color:var(--apple-blue); margin-bottom:15px;"></i>
+                        <h3>Unit Testing</h3>
+                        <p>Generación automática de casos de borde lógicos complejos.</p>
+                    </div>
+                    <div class="card">
+                        <i data-lucide="book-open" style="color:var(--apple-blue); margin-bottom:15px;"></i>
+                        <h3>Socrático</h3>
+                        <p>Explicación profunda de sistemas legados sin documentación.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: LABORATORIO INTELIGENTE -->
+        <section id="slide15">
+            <div class="slide-content full-width">
+                <span class="tag">Aprendizaje Activo ✨</span>
+                <h2 class="gradient-text">Laboratorio de Ingeniería IA</h2>
+                <div class="tool-grid">
+                    <div class="tool-panel">
+                        <h3>✨ Generador de config.yaml</h3>
+                        <input type="text" id="hwInput" class="tool-input" placeholder="Specs: Mac M2 16GB RAM o PC RTX 4070...">
+                        <button class="btn-tool" onclick="generateConfig()"><i data-lucide="cog"></i> Generar YAML</button>
+                        <div id="yamlResult" class="result-area"></div>
+                    </div>
+                    <div class="tool-panel">
+                        <h3>✨ Arquitecto Mermaid</h3>
+                        <input type="text" id="umlDesc" class="tool-input" placeholder="Ej: Diagrama de búsqueda binaria">
+                        <button class="btn-tool" onclick="generateMermaid()"><i data-lucide="layout"></i> Crear UML</button>
+                        <div id="umlResult" class="result-area" style="color:var(--apple-blue)"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: WORKFLOW COMPARATIVO -->
+        <section id="slide16">
+            <div class="slide-content full-width">
+                <span class="tag">Conceptualización</span>
+                <h2>Evolución del Trabajo Diario</h2>
+                <div class="workflow-grid">
+                    <div class="card">
+                        <div class="wf-label">Tradicional</div>
+                        <div class="mermaid">
+                            graph TD
+                                A[Idea] --> B[Docs Manual]
+                                B --> C[Codificación]
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="wf-label">IA Aumentada</div>
+                        <div class="mermaid">
+                            graph TD
+                                A[Idea] --> B[Contexto @codebase]
+                                B --> C[Inferencia]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: DE CODIFICADOR A ARQUITECTO -->
+        <section id="slide17">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Visión de Carrera</span>
+                    <h2>El Ingeniero del Siglo XXI</h2>
+                    <p>Delegamos la sintaxis para elevarnos hacia el diseño estratégico. Tu labor ahora es la validación ética y lógica de los sistemas.</p>
+                </div>
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200" alt="Diseño Arquitectónico">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: RESUMEN COGNITIVO -->
+        <section id="slide18">
+            <div class="slide-content">
+                <div class="card">
+                    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400" style="width:100%; border-radius:20px; margin-bottom:15px;" alt="Hardware Industrial">
+                    <h3>Puntos Clave</h3>
+                    <ul>
+                        <li>Ollama: El servidor local de pesos.</li>
+                        <li>GGUF: La compresión inteligente.</li>
+                        <li>YAML: Las reglas de orquestación.</li>
+                    </ul>
+                </div>
+                <div class="text-side">
+                    <span class="tag">Síntesis</span>
+                    <h2>Dominio del Entorno</h2>
+                    <p>Entender la infraestructura física y lógica que permite la magia de la IA en milisegundos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 19: EL TRÍPODE LOCAL -->
+        <section id="slide19">
+            <div class="slide-content full-width">
+                <span class="tag">Resumen Final</span>
+                <h2>La Estructura Local</h2>
+                <div style="display: flex; justify-content: space-around; gap:30px; margin-top:40px;">
+                    <div class="card" style="flex:1;"><h3>Engine</h3><p>Ollama.</p></div>
+                    <div class="card" style="flex:1;"><h3>Config</h3><p>YAML Routing.</p></div>
+                    <div class="card" style="flex:1;"><h3>Agent</h3><p>Continue + RAG.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: CONCLUSIÓN SANKALPA -->
+        <section id="slide20">
+            <div class="slide-content full-width">
+                <span class="tag">Jose Luis Oemig / Sankalpa</span>
+                <h1>Ingeniería Consciente</h1>
+                <div class="img-wrapper" style="height: 300px; max-width: 700px; margin: 30px auto; border-radius: 50px;">
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200" alt="Naturaleza y Paz Zen">
+                </div>
+                <p>Domina el código para armonizar el mundo. La técnica sin propósito es solo ruido.</p>
+                <div style="margin-top: 40px; font-weight: 800; font-size: 1.4rem;" class="gradient-text">
+                    "El código es temporal; la arquitectura es pensamiento; la consciencia es eterna."
+                </div>
+                <button onclick="document.getElementById('deck').scrollTo({top:0, behavior:'smooth'})" style="margin-top: 50px; padding:15px 40px; border-radius:30px; border:none; background:var(--apple-black); color:white; font-weight:700; cursor:pointer;">Reiniciar</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Gemini Floating Consultant -->
+    <div class="gemini-btn" onclick="toggleModal()"><i data-lucide="sparkles"></i></div>
+
+    <!-- Modal Gemini -->
+    <div id="geminiModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.6rem;"><i data-lucide="bot" style="vertical-align:middle; margin-right:12px; color:var(--apple-blue);"></i> Consultor Académico</h2>
+                <i data-lucide="x" onclick="toggleModal()" style="cursor:pointer; opacity:0.4;"></i>
+            </div>
+            <p style="color:var(--apple-gray); margin-top:10px;">Consulta técnica profunda sobre la Unidad 7.</p>
+            <input type="text" id="chatInput" placeholder="Ej: ¿Diferencia entre Qwen y Llama?" onkeypress="if(event.key==='Enter') askGemini()">
+            <button onclick="askGemini()" id="sendBtn" style="width:100%; padding:20px; border-radius:18px; border:none; background:var(--apple-blue); color:white; font-weight:700; cursor:pointer;">Consultar a Gemini</button>
+            <div id="chatResponse"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mermaid Configuration
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral', fontFamily: 'Inter' });
+        lucide.createIcons();
+
+        // Dots & Navigation Tracking
+        const deck = document.getElementById('deck');
+        const sections = document.querySelectorAll('section');
+        const dotNav = document.getElementById('dotNav');
+
+        sections.forEach((s, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.dataset.target = s.id;
+            dot.onclick = () => {
+                const target = document.getElementById(dot.dataset.target);
+                deck.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+            };
+            dotNav.appendChild(dot);
+        });
+
+        deck.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => {
+                if (deck.scrollTop >= s.offsetTop - 100) current = s.id;
+            });
+            sections.forEach(s => s.classList.toggle('visible', s.id === current));
+            document.querySelectorAll('.dot').forEach(d => d.classList.toggle('active', d.dataset.target === current));
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+        });
+
+        // Gemini API Helpers
+        const apiKey = "";
+        const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        async function apiCall(prompt, system) {
+            let retries = 5, delay = 1000;
+            while(retries > 0) {
+                try {
+                    const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: system }] }
+                        })
+                    });
+                    if(!res.ok) throw new Error();
+                    const data = await res.json();
+                    return data.candidates[0].content.parts[0].text;
+                } catch(e) {
+                    retries--;
+                    if(retries === 0) throw e;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        async function generateConfig() {
+            const input = document.getElementById('hwInput').value.trim();
+            const resArea = document.getElementById('yamlResult');
+            if(!input) return;
+            resArea.style.display = 'block';
+            resArea.innerHTML = '<span class="loader">Analizando arquitectura de hardware</span>';
+            try {
+                const text = await apiCall(`Hardware: ${input}`, "Eres un experto en Continue.dev. Genera un config.yaml optimizado para el hardware mencionado. Usa Qwen2.5-Coder:7b como base. Devuelve SOLO el código YAML.");
+                resArea.innerText = text.replace(/```yaml|```/g, "").trim();
+            } catch(e) { resArea.innerText = "Fallo al generar configuración."; }
+        }
+
+        async function generateMermaid() {
+            const input = document.getElementById('umlDesc').value.trim();
+            const resArea = document.getElementById('umlResult');
+            if(!input) return;
+            resArea.style.display = 'block';
+            resArea.innerHTML = '<span class="loader">Diseñando UML</span>';
+            try {
+                const text = await apiCall(`Diagrama: ${input}`, "Eres un experto en Mermaid.js. Genera el código para el diagrama solicitado. Devuelve SOLO el código Mermaid, sin bloques markdown.");
+                resArea.innerText = text.trim();
+            } catch(e) { resArea.innerText = "Fallo al diseñar diagrama."; }
+        }
+
+        function toggleModal() {
+            const m = document.getElementById('geminiModal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') document.getElementById('chatInput').focus();
+        }
+
+        async function askGemini() {
+            const i = document.getElementById('chatInput');
+            const r = document.getElementById('chatResponse');
+            const btn = document.getElementById('sendBtn');
+            const q = i.value.trim();
+            if(!q) return;
+
+            btn.disabled = true;
+            btn.innerHTML = 'Razonando<span class="loader"></span>';
+            r.style.display = 'block';
+            r.innerHTML = '<em>Consultando la base universitaria...</em>';
+
+            const system = `Eres Jose Luis Oemig, docente de Algoritmos III. Resume los temas de la Unidad 7. Responde con rigor técnico pero enfoque pedagógico socrático.`;
+
+            try {
+                const text = await apiCall(q, system);
+                r.innerText = text;
+            } catch (e) { r.innerText = "Error de conexión."; }
+            finally {
+                btn.disabled = false;
+                btn.innerText = "Consultar a Gemini";
+            }
+        }
+
+        // Initial Slide Visibility
+        sections[0].classList.add('visible');
+    </script>
+</body>
+</html>

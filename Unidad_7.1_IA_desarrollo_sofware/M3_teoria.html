@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AED III - Módulo 3: La Dimensión Operativa de la IA</title>
+    <!-- Bibliotecas de Visualización y Estilo -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #f5f5f7;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --glass: rgba(255, 255, 255, 0.85);
+            --transition-speed: 0.8s;
+            --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: white;
+            color: var(--apple-black);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Presentation Engine */
+        .presentation-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 60px;
+            position: relative;
+            background: white;
+        }
+
+        /* Nav Glassmorphism */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: var(--glass);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto; padding: 0 30px; height: 52px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            text-decoration: none; color: var(--apple-black); font-size: 0.75rem;
+            font-weight: 500; opacity: 0.6; transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--apple-blue); }
+
+        /* Sidebar Progress Dots */
+        .dots-menu {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .dot {
+            width: 8px; height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.4s var(--transition-curve);
+        }
+        .dot.active { background: var(--apple-blue); transform: scale(1.6); }
+
+        /* Portadas Temáticas */
+        .portada-section {
+            background: var(--apple-black);
+            width: 100%;
+            height: 75vh;
+            border-radius: 40px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            overflow: hidden;
+            box-shadow: 0 50px 120px rgba(0,0,0,0.25);
+            color: white;
+        }
+        .portada-content { padding: 100px; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+        .portada-content h2 { font-size: 4rem; color: white; margin: 0; letter-spacing: -0.04em; line-height: 1; }
+        .portada-image { overflow: hidden; position: relative; }
+        .portada-image img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); }
+
+        /* Slide Content Structure */
+        .slide-content {
+            max-width: 1300px; width: 100%;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 60px; align-items: center;
+            opacity: 0; transform: translateY(40px);
+            transition: all var(--transition-speed) var(--transition-curve);
+        }
+        section.visible .slide-content { opacity: 1; transform: translateY(0); }
+
+        .full-width { grid-column: 1 / -1; text-align: center; }
+
+        h1 { font-size: clamp(2rem, 7vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1.1; margin: 0; }
+        h2 { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 25px; }
+        h3 { font-size: 1.5rem; font-weight: 600; color: var(--apple-blue); margin-bottom: 15px; }
+        p { font-size: 1.2rem; line-height: 1.7; color: #424245; }
+
+        .tag {
+            text-transform: uppercase; font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.2em; color: var(--apple-gray); margin-bottom: 15px; display: block;
+        }
+
+        /* Aesthetic Enhancements */
+        .card {
+            background: var(--apple-bg); border-radius: 36px; padding: 40px;
+            border: 1px solid rgba(0,0,0,0.03); text-align: left; transition: transform 0.4s ease;
+        }
+        .card:hover { transform: translateY(-8px); }
+        .card li { margin-bottom: 12px; font-size: 1.05rem; }
+
+        .img-box {
+            width: 100%; height: 500px; background: #eee; border-radius: 44px;
+            overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+        }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
+
+        /* MEGA DIAGRAM CONTAINER - VISIBILIDAD GIGANTE */
+        .diagram-massive-container {
+            width: 95vw;
+            height: 75vh;
+            background: white;
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid var(--apple-bg);
+            overflow: visible;
+        }
+        
+        .mermaid-mega-render {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .code-window {
+            background: #1e1e1e; color: #d4d4d4; padding: 28px;
+            border-radius: 24px; font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; text-align: left; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 1px solid #333;
+        }
+
+        /* Comparative Table */
+        .academic-table {
+            width: 100%; border-collapse: collapse; background: white;
+            border-radius: 28px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        }
+        .academic-table th { background: var(--apple-black); color: white; padding: 25px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .academic-table td { padding: 25px; border-bottom: 1px solid #f0f0f2; font-size: 1.05rem; color: #424245; }
+        .academic-table tr:hover { background: #fbfbfd; }
+
+        /* Repaso Section Styling */
+        .repaso-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-top: 40px; }
+
+        /* Gemini Assistant */
+        .gemini-btn {
+            position: fixed; bottom: 35px; right: 35px; background: var(--gemini-gradient);
+            width: 72px; height: 72px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; color: white; cursor: pointer; box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+            z-index: 1100; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gemini-btn:hover { transform: scale(1.15) rotate(5deg); }
+
+        #geminiModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.35); backdrop-filter: blur(30px); z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+        .modal-card { background: white; width: 92%; max-width: 850px; border-radius: 44px; padding: 50px; position: relative; }
+        #chatInput { width: 100%; padding: 24px; border: 1px solid #d2d2d7; border-radius: 20px; font-size: 1.15rem; margin: 25px 0; outline: none; background: #fbfbfd; }
+        #chatResponse { background: #f5f5f7; padding: 25px; border-radius: 20px; max-height: 300px; overflow-y: auto; text-align: left; }
+
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 1100px) {
+            .slide-content { grid-template-columns: 1fr; gap: 40px; }
+            .portada-section { grid-template-columns: 1fr; height: auto; }
+            .img-box { height: 350px; }
+            .diagram-massive-container { height: auto; min-height: 450px; width: 90vw; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">Algoritmos III - Unidad 7.3 Masterclass</div>
+            <div class="nav-links">
+                <a href="#intro">Apertura</a>
+                <a href="#indice">Índice</a>
+                <a href="#portada-chat">Chat</a>
+                <a href="#portada-auto">Auto</a>
+                <a href="#portada-agent">Agent</a>
+                <a href="#portada-plan">Plan</a>
+                <a href="#repaso-final">Resumen</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dots-menu" id="dotNav"></div>
+
+    <div class="presentation-container" id="deck">
+        
+        <!-- S1: HERO -->
+        <section id="intro">
+            <div class="slide-content full-width">
+                <span class="tag">Módulo 3 · Dimensión Operativa</span>
+                <h1>El Vuelo del Copiloto</h1>
+                <p>Nuevos paradigmas de soberanía intelectual y orquestación de inteligencia local en Ingeniería de Software.</p>
+                <div class="img-box" style="height: 400px; max-width: 1000px; margin: 40px auto;">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1400" alt="Ingeniería y Conectividad">
+                </div>
+            </div>
+        </section>
+
+        <!-- S2: ÍNDICE DETALLADO -->
+        <section id="indice">
+            <div class="slide-content full-width">
+                <span class="tag">Hoja de Ruta</span>
+                <h2>Temario de la Masterclass</h2>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-top: 40px; text-align: left;">
+                    <div class="card">
+                        <h3>1. Chat: El Razonador</h3>
+                        <p>Resolución socrática y Chain-of-Thought (CoT) para arquitecturas complejas.</p>
+                    </div>
+                    <div class="card">
+                        <h3>2. Auto: El Fluido</h3>
+                        <p>Mecánica Fill-In-the-Middle (FIM) y optimización de latencia crítica en microsegundos.</p>
+                    </div>
+                    <div class="card">
+                        <h3>3. Agent: El Ejecutor</h3>
+                        <p>Delegación asíncrona, patrón ReAct y el bucle de validación humana (Human-in-the-loop).</p>
+                    </div>
+                    <div class="card">
+                        <h3>4. Plan: El Arquitecto</h3>
+                        <p>Generación de blueprints estratégicos y roadmaps de implementación de alto nivel.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- S3: INTRO TEÓRICA -->
+        <section id="fundamentos">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Marco Conceptual</span>
+                    <h2>El Espectro de Delegación</h2>
+                    <p>En ingeniería de software aumentada, el éxito no reside en cuánto código genera la IA, sino en la **fricción cognitiva** que el ingeniero decide tolerar.</p>
+                    <div class="card" style="margin-top: 25px;">
+                        <p><strong>Regla de Oro:</strong> Delegamos la sintaxis, pero nunca la arquitectura. La responsabilidad ética y técnica del código es 100% humana.</p>
+                    </div>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200" alt="Silicio y Datos">
+                </div>
+            </div>
+        </section>
+
+        <!-- --- MODALIDAD 1: CHAT --- -->
+        <!-- S4: PORTADA CHAT -->
+        <section id="portada-chat">
+            <div class="portada-section">
+                <div class="portada-content">
+                    <span class="tag" style="color:rgba(255,255,255,0.6)">Módulo 01</span>
+                    <h2>Chat Mode</h2>
+                    <p>La Dimensión Dialógica del Desarrollo.</p>
+                </div>
+                <div class="portada-image">
+                    <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1200" alt="Diálogo IA">
+                </div>
+            </div>
+        </section>
+
+        <!-- S5: CHAT THEORY -->
+        <section id="chat-theory">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Interacción Dialógica</span>
+                    <h2>El Consultor Socrático</h2>
+                    <p>El modo Chat permite inyectar el **@contexto** necesario para que la IA comprenda no solo la línea actual, sino la intención del sistema completo.</p>
+                    <ul>
+                        <li><strong>Análisis Contextual:</strong> Inyección selectiva de AST y LSP.</li>
+                        <li><strong>Diagnóstico:</strong> "¿Por qué este algoritmo de Grafos genera un ciclo infinito?".</li>
+                        <li><strong>Refinamiento:</strong> Iterar sobre la lógica antes de aterrizar en el código duro.</li>
+                    </ul>
+                </div>
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=1200" alt="Workspace">
+                </div>
+            </div>
+        </section>
+
+        <!-- S6: CHAT PRACTICA C++ -->
+        <section id="chat-practica">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">AED III en Acción</span>
+                    <h2>Debugging de Árboles AVL</h2>
+                    <p><strong>Caso Real:</strong> Un alumno intenta corregir un rebalanceo complejo. El Chat no escribe el código, explica la rotación.</p>
+                    <div class="code-window" style="margin-top:20px;">
+                        <span style="color:#6a9955">// Prompt sugerido:</span><br>
+                        "@file:AVLTree.cpp explica por qué el factor de equilibrio no se está actualizando tras una rotación doble a la derecha."
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Impacto Cognitivo</h3>
+                    <p>El ingeniero aprende a depurar mediante el razonamiento asistido, no mediante el "copy-paste". Es el uso de la IA como mentor 24/7.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- --- MODALIDAD 2: AUTOCOMPLETE --- -->
+        <!-- S7: PORTADA AUTO -->
+        <section id="portada-auto">
+            <div class="portada-section" style="background: var(--apple-blue);">
+                <div class="portada-image">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200" alt="Velocidad">
+                </div>
+                <div class="portada-content">
+                    <span class="tag" style="color:rgba(255,255,255,0.7)">Módulo 02</span>
+                    <h2>Autocomplete</h2>
+                    <p>Inferencia Predictiva en el Estado de Flujo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- S8: AUTO THEORY FIM -->
+        <section id="auto-fim">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Mecánica del Token</span>
+                    <h2>Fill-In-the-Middle (FIM)</h2>
+                    <p>El autocompletado no es predictivo de palabras; es predictivo de **bloques lógicos**. El modelo recibe el prefijo y el sufijo para predecir el centro.</p>
+                    <div class="code-window" style="margin-top:15px;">
+                        <span style="color:#86868b">PRE:</span> void quicksort(int arr[], int l, int h) {<br>
+                        <span style="color:#ce9178">FIM -> [INFERENCIA DE IA]</span><br>
+                        <span style="color:#86868b">SUF:</span> }
+                    </div>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=1200" alt="Redes de Datos">
+                </div>
+            </div>
+        </section>
+
+        <!-- S9: AUTO LATENCIA -->
+        <section id="auto-latency">
+            <div class="slide-content">
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&q=80&w=1200" alt="Hardware Performance">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Performance Crítica</span>
+                    <h2>La Regla de los 100ms</h2>
+                    <p>Para que el autocompletado sea útil, la inferencia debe ocurrir en menos de 100ms. Si hay lag, se rompe el flujo creativo.</p>
+                    <div class="card" style="margin-top:20px;">
+                        <p><strong>Configuración:</strong> Usamos modelos de 1.5B parámetros (ej. Qwen 1.5B) exclusivos para esta tarea en el <code>config.yaml</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- S10: AUTO RISKS -->
+        <section id="auto-risks">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Riesgos Cognitivos</span>
+                    <h2>La Competencia Fantasma</h2>
+                    <p>Aceptar sugerencias automáticas sin auditar genera una falsa sensación de dominio técnico.</p>
+                    <div class="card" style="margin-top:20px; border-left: 5px solid var(--apple-red);">
+                        <p><strong>Riesgo:</strong> Código sintácticamente correcto pero algorítmicamente ineficiente (O de n^2 cuando se requería O log n).</p>
+                    </div>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=1200" alt="Control de Calidad">
+                </div>
+            </div>
+        </section>
+
+        <!-- --- MODALIDAD 3: AGENTE --- -->
+        <!-- S11: PORTADA AGENT -->
+        <section id="portada-agent">
+            <div class="portada-section">
+                <div class="portada-content">
+                    <span class="tag" style="color:rgba(255,255,255,0.6)">Módulo 03</span>
+                    <h2>Agent Mode</h2>
+                    <p>De la Sugerencia a la Delegación Autónoma.</p>
+                </div>
+                <div class="portada-image">
+                    <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=1200" alt="Nodos Neuronales">
+                </div>
+            </div>
+        </section>
+
+        <!-- S12: AGENT ARCHITECTURE (VISIBILIDAD GIGANTE) -->
+        <section id="agent-arch">
+            <div class="slide-content full-width">
+                <span class="tag">Arquitectura Técnica de Delegación</span>
+                <h2 style="font-size: 2rem;">Flujo Maestro: Agentic Codebase Orquestation</h2>
+                
+                <div class="diagram-massive-container">
+                    <div class="mermaid-mega-render">
+                        <div class="mermaid">
+                            graph LR
+                                subgraph "INTENCIÓN HUMANA (USUARIO)"
+                                    A[Usuario: Slash Command /edit] -->|Define Tarea Acotada| B(Agente Continue)
+                                end
+                                
+                                subgraph "CAPA DE ORQUESTACIÓN (LOGIC)"
+                                    B -->|1. Planifica Tarea| C{Motor de Herramientas}
+                                    C -->|2. Acceso I/O| D[File System / Terminal]
+                                    D -->|3. Contexto Semántico| E[Prompt Builder]
+                                end
+                                
+                                subgraph "CAPA DE INFERENCIA (HARDWARE)"
+                                    E -->|4. Inferencia Local| F[Ollama Server]
+                                    F -->|5. Carga Pesos GGUF| G[VRAM / GPU Hardware]
+                                end
+                                
+                                G -->|6. Propuesta de Solución| B
+                                B -->|7. Presentación de DIFF| A
+                                
+                                style B fill:#0071e3,color:#fff,stroke-width:10px
+                                style G fill:#d96570,color:#fff,stroke-width:6px
+                                style F fill:#34c759,color:#fff,stroke-width:4px
+                                style A fill:#f5f5f7,stroke:#1d1d1f,stroke-width:4px
+                        </div>
+                    </div>
+                </div>
+                <p style="margin-top:20px; font-weight: 600;">Nota: El diagrama utiliza fuentes de 32px para legibilidad total en proyector.</p>
+            </div>
+        </section>
+
+        <!-- S13: AGENT REACT PATTERN -->
+        <section id="agent-react">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Lógica del Agente</span>
+                    <h2>El Patrón ReAct (Reasoning + Acting)</h2>
+                    <p>El agente no escribe código de inmediato. Sigue un bucle iterativo:</p>
+                    <ul>
+                        <li><strong>Pensamiento:</strong> "Necesito leer BST.h para ver la definición de la clase".</li>
+                        <li><strong>Acción:</strong> Ejecuta comando de lectura de archivo.</li>
+                        <li><strong>Observación:</strong> "Veo que falta el constructor de copia".</li>
+                        <li><strong>Planificación:</strong> Proponer la implementación del constructor.</li>
+                    </ul>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=1200" alt="Redes de Datos">
+                </div>
+            </div>
+        </section>
+
+        <!-- S14: AGENT EXAMPLES -->
+        <section id="agent-examples">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Delegación Real</span>
+                    <h2>Automatización de SDLC</h2>
+                    <p>El Agente es ideal para tareas repetitivas de alta carga sintáctica pero baja carga creativa.</p>
+                    <div class="card" style="margin-top:20px;">
+                        <p>• <strong>Generación de Tests:</strong> "/edit crea 5 unit tests para la función de inserción en el grafo".<br>
+                        • <strong>Refactorización:</strong> "/edit convierte todos los punteros raw a smart pointers (std::unique_ptr)".</p>
+                    </div>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=1200" alt="Setup Tech">
+                </div>
+            </div>
+        </section>
+
+        <!-- --- MODALIDAD 4: PLAN --- -->
+        <!-- S15: PORTADA PLAN -->
+        <section id="portada-plan">
+            <div class="portada-section" style="background: var(--apple-gray);">
+                <div class="portada-image">
+                    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=1200" alt="Arquitectura">
+                </div>
+                <div class="portada-content">
+                    <span class="tag" style="color:rgba(255,255,255,0.7)">Módulo 04</span>
+                    <h2>Plan Mode</h2>
+                    <p>El Blueprint Estratégico antes de la Acción.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- S16: PLAN THEORY -->
+        <section id="plan-theory">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Fase de Diseño</span>
+                    <h2>Estrategia antes de Táctica</h2>
+                    <p>El modo Plan descompone requerimientos ambiguos en una estructura lógica. Es vital para evitar el "Código Espagueti".</p>
+                    <ul>
+                        <li><strong>Roadmaps:</strong> Pasos secuenciales de codificación.</li>
+                        <li><strong>Análisis de Impacto:</strong> ¿Qué archivos se romperán al cambiar esto?</li>
+                        <li><strong>Validación Estructural:</strong> Alineación con patrones de diseño (SOLID).</li>
+                    </ul>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&q=80&w=1200" alt="Planning">
+                </div>
+            </div>
+        </section>
+
+        <!-- S17: PLAN EXAMPLE -->
+        <section id="plan-example">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Diseño Técnico</span>
+                    <h2>Blueprinting de un Módulo de DB</h2>
+                    <p><strong>Consulta:</strong> "@codebase necesito un sistema para persistir el Grafo de rutas en una base de datos SQLite."</p>
+                </div>
+                <div class="code-window">
+                    <h4 style="color:#34c759; margin-top:0;">Plan Generado:</h4>
+                    <ol>
+                        <li>Crear interfaz <code>IDataPersistence</code>.</li>
+                        <li>Implementar clase <code>SQLiteAdapter</code> en <code>/db</code>.</li>
+                        <li>Diseñar esquema de tabla para 'Aristas' y 'Nodos'.</li>
+                        <li>Actualizar <code>main.cpp</code> para inyectar persistencia.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- S18: COMPARATIVA TÉCNICA -->
+        <section id="comparativa">
+            <div class="slide-content full-width">
+                <span class="tag">Síntesis Operativa</span>
+                <h2>Cuadro Comparativo de Modalidades</h2>
+                <table class="academic-table">
+                    <thead>
+                        <tr>
+                            <th>Modo</th>
+                            <th>Fuerza Principal</th>
+                            <th>Nivel Autonomía</th>
+                            <th>Uso en Algoritmos III</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Chat</strong></td><td>Razonamiento / Debug</td><td>Bajo (Interactuado)</td><td>Explicar recursividad compleja</td></tr>
+                        <tr><td><strong>Auto</strong></td><td>Velocidad / Fluidez</td><td>Medio (Invisibilidad)</td><td>Cerrar bucles de búsqueda</td></tr>
+                        <tr><td><strong>Agent</strong></td><td>Acción / Resolución</td><td>Alto (Delegado)</td><td>Generar Unit Tests masivos</td></tr>
+                        <tr><td><strong>Plan</strong></td><td>Estrategia / Blueprint</td><td>Bajo (Estructurado)</td><td>Diseñar la lógica de un Proyecto Final</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- S19: SOBERANÍA E IP -->
+        <section id="soberania">
+            <div class="slide-content">
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1200" alt="Seguridad">
+                </div>
+                <div class="text-side">
+                    <span class="tag">Ética y Profesionalismo</span>
+                    <h2>Soberanía del Pensamiento</h2>
+                    <p>La IA debe ser una palanca para elevar nuestro nivel de abstracción, no una prótesis para anular nuestra capacidad crítica.</p>
+                    <div class="card" style="border-left: 5px solid var(--apple-blue);">
+                        <p><strong>Responsabilidad:</strong> El ingeniero es el autor legal y técnico. Si no puedes explicar una línea de código, no te pertenece.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- --- SECCIÓN DE REPASO (4 DIAPOSITIVAS) --- -->
+        
+        <section id="repaso1">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Repaso Conceptual 01</span>
+                    <h2>Orquestación Contextual</h2>
+                    <p>Aprendimos que la IA es tan buena como el contexto (@file, @codebase) que el agente le inyecta. Sin contexto, hay alucinación.</p>
+                </div>
+                <div class="card">
+                    <h3>¿Por qué Ollama?</h3>
+                    <p>Garantizamos soberanía de datos y latencia determinística. CAPEX sobre OPEX.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="repaso2">
+            <div class="slide-content full-width">
+                <span class="tag">Repaso Conceptual 02</span>
+                <h2>Estrategia de Modelos Duales</h2>
+                <div class="repaso-grid">
+                    <div class="card">
+                        <h3>Inferencia de Pensamiento</h3>
+                        <p>Modelos >7B para Chat y Agent. Buscamos lógica arquitectónica sólida.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Inferencia de Escritura</h3>
+                        <p>Modelos < 3B para Autocomplete. Buscamos respuestas en milisegundos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="repaso3">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Repaso Conceptual 03</span>
+                    <h2>El Ciclo del Token</h2>
+                    <p>Desde la intención humana hasta la VRAM. El flujo de streaming permite ver la "pensada" del modelo antes de aceptarla.</p>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200" alt="Flujo Digital">
+                </div>
+            </div>
+        </section>
+
+        <section id="repaso4">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Repaso Conceptual 04</span>
+                    <h2>Auditoría Humana Obligatoria</h2>
+                    <p>Toda sugerencia de la IA debe pasar por el filtro de la verificabilidad. Si no hay test, no hay verdad técnica.</p>
+                </div>
+                <div class="card" style="border-left: 5px solid var(--apple-blue);">
+                    <p><strong>El Ingeniero es el Orquestador:</strong> La IA es el instrumento, pero el humano es el director de la orquesta algorítmica.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- S24: SÍNTESIS FINAL -->
+        <section id="resumen">
+            <div class="slide-content full-width">
+                <span class="tag">Conclusión de la Unidad 7.3</span>
+                <h1>Hacia la Maestría Aumentada</h1>
+                <div style="display:flex; justify-content:space-around; gap:20px; margin-top:40px;">
+                    <div class="card" style="flex:1;"><h3>Planifica</h3><p>Modo Plan.</p></div>
+                    <div class="card" style="flex:1;"><h3>Razona</h3><p>Modo Chat.</p></div>
+                    <div class="card" style="flex:1;"><h3>Ejecuta</h3><p>Modo Agente.</p></div>
+                    <div class="card" style="flex:1;"><h3>Fluye</h3><p>Modo Auto.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- S25: CIERRE SANKALPA -->
+        <section id="cierre">
+            <div class="slide-content full-width">
+                <span class="tag">Jose Luis Oemig / Sankalpa</span>
+                <h1>Ingeniería con Intención</h1>
+                <div class="img-box" style="height: 300px; max-width: 650px; margin: 30px auto; border-radius: 50%;">
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200" alt="Equilibrio Zen">
+                </div>
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <p>Dominar los modos operativos no es solo una habilidad técnica; es un ejercicio de presencia absoluta. Un ingeniero que orquesta su entorno con intención consciente transforma el código en una herramienta de orden y armonía.</p>
+                    <div style="margin-top: 40px; font-weight: 800; font-size: 1.4rem; background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        "Que tu código sea la luz que ordena tu propio pensamiento."
+                    </div>
+                </div>
+                <button onclick="scrollToId('intro')" style="margin-top: 50px; padding:15px 40px; border-radius:30px; border:none; background:var(--apple-black); color:white; font-weight:700; cursor:pointer;">Reiniciar Masterclass</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Gemini Floating Consultant -->
+    <div class="gemini-btn" onclick="toggleModal()"><i data-lucide="sparkles"></i></div>
+
+    <!-- Modal Gemini -->
+    <div id="geminiModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.6rem;"><i data-lucide="bot" style="vertical-align:middle; margin-right:12px; color:var(--apple-blue);"></i> Consultor Académico</h2>
+                <i data-lucide="x" onclick="toggleModal()" style="cursor:pointer; opacity:0.3;"></i>
+            </div>
+            <p style="color:var(--apple-gray); margin-top:10px;">Consulta técnica profunda sobre el Módulo 3.</p>
+            <input type="text" id="chatInput" placeholder="Ej: ¿Diferencia real entre Agent y Plan mode?" onkeypress="if(event.key==='Enter') askGemini()">
+            <button onclick="askGemini()" id="sendBtn" style="width:100%; padding:18px; border-radius:15px; border:none; background:var(--apple-blue); color:white; font-weight:700; cursor:pointer;">Consultar a Gemini</button>
+            <div id="chatResponse" style="margin-top:20px; display:none; background:#f5f5f7; padding:20px; border-radius:15px; max-height:350px; overflow-y:auto; text-align:left;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mermaid Initialization with MASSIVE fonts
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'neutral', 
+            fontFamily: 'Inter', 
+            fontSize: 32,
+            flowchart: { htmlLabels: true, curve: 'basis', padding: 60 },
+            themeVariables: { fontSize: '32px', titleFontSize: '38px' }
+        });
+        
+        lucide.createIcons();
+
+        // Presentation Logic
+        const deck = document.getElementById('deck');
+        const sections = document.querySelectorAll('section');
+        const dotNav = document.getElementById('dotNav');
+
+        sections.forEach((s, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.dataset.target = s.id;
+            dot.onclick = () => scrollToId(s.id);
+            dotNav.appendChild(dot);
+        });
+
+        function scrollToId(id) {
+            const target = document.getElementById(id);
+            deck.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+        }
+
+        deck.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => { if (deck.scrollTop >= s.offsetTop - 100) current = s.id; });
+            sections.forEach(s => s.classList.toggle('visible', s.id === current));
+            document.querySelectorAll('.dot').forEach(d => d.classList.toggle('active', d.dataset.target === current));
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+        });
+
+        // Gemini API Configuration
+        const apiKey = ""; 
+        const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        async function apiCall(prompt, system) {
+            try {
+                const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
+                });
+                const data = await res.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { return "Error de conexión con el motor socrático."; }
+        }
+
+        function toggleModal() {
+            const m = document.getElementById('geminiModal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') document.getElementById('chatInput').focus();
+        }
+
+        async function askGemini() {
+            const i = document.getElementById('chatInput');
+            const r = document.getElementById('chatResponse');
+            const btn = document.getElementById('sendBtn');
+            const q = i.value.trim();
+            if(!q) return;
+
+            btn.disabled = true; btn.innerHTML = 'Razonando<span class="loader"></span>';
+            r.style.display = 'block'; r.innerHTML = '<em>Consultando la base universitaria y socrática...</em>';
+
+            const system = `Eres Jose Luis Oemig, docente de Algoritmos III. Resume los temas del Módulo 3 de forma técnica y socrática.`;
+
+            try {
+                const text = await apiCall(q, system);
+                r.innerText = text;
+            } catch (e) { r.innerText = "Error."; }
+            finally { btn.disabled = false; btn.innerText = "Consultar a Gemini"; }
+        }
+
+        sections[0].classList.add('visible');
+    </script>
+</body>
+</html>

@@ -1,0 +1,534 @@
+
+Modulo 0 - Teorico.html
+100 %
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AED III - Masterclass: IA y LLM (Edición Magistral)</title>
+    <!-- Bibliotecas y Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #ffffff;
+            --apple-light-gray: #f5f5f7;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --transition-speed: 1s;
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-black);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Presentation Engine */
+        .presentation-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            background: white;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Nav Glassmorphism Centrada */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 40px; height: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo { font-weight: 900; font-size: 1rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            text-decoration: none; color: var(--apple-black); font-size: 0.7rem;
+            font-weight: 600; opacity: 0.5; transition: 0.3s;
+        }
+        .nav-links a.active { opacity: 1; color: var(--apple-blue); }
+
+        /* Progress Dots */
+        .dots-menu {
+            position: fixed; right: 40px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 12px; z-index: 1000;
+        }
+        .dot {
+            width: 8px; height: 8px; border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 50%; cursor: pointer; transition: 0.4s;
+        }
+        .dot.active { background: var(--apple-blue); transform: scale(1.8); }
+
+        /* Footer */
+        .slide-footer {
+            position: absolute; bottom: 20px; left: 0; width: 100%;
+            text-align: center; font-size: 0.65rem; color: var(--apple-gray);
+            font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+        }
+
+        /* Transitions Engine */
+        .slide-content {
+            max-width: 1100px; width: 100%;
+            display: flex; flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        /* Clases de Animación Dinámica */
+        .anim-zoom { transform: scale(0.85); }
+        .anim-up { transform: translateY(80px); }
+        .anim-down { transform: translateY(-80px); }
+        .anim-left { transform: translateX(-80px); }
+        .anim-right { transform: translateX(80px); }
+        .anim-flip { transform: perspective(1000px) rotateX(-20deg); }
+
+        section.visible .slide-content { opacity: 1; transform: none !important; }
+
+        /* Typography */
+        h1 { font-size: clamp(2rem, 7vw, 4.2rem); font-weight: 900; letter-spacing: -0.06em; line-height: 1; margin: 0; }
+        h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 20px; line-height: 1.1; }
+        h3 { font-size: 1.5rem; font-weight: 700; color: var(--apple-blue); margin-bottom: 12px; }
+        p { font-size: 1.1rem; line-height: 1.7; color: #3a3a3c; max-width: 950px; margin: 0 auto; text-align: center; }
+
+        .tag {
+            text-transform: uppercase; font-size: 0.7rem; font-weight: 800;
+            letter-spacing: 0.25em; color: var(--apple-gray); margin-bottom: 15px; display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--apple-light-gray); border-radius: 44px; padding: 45px;
+            border: 1px solid rgba(0,0,0,0.02); width: 100%; max-width: 950px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.02); margin-top: 20px;
+            text-align: center;
+        }
+
+        .img-wrapper {
+            width: 100%; max-width: 900px; height: 420px; border-radius: 50px;
+            overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.08);
+            margin: 30px auto; background: #f2f2f7;
+        }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .code-window {
+            background: #1e1e1e; color: #d4d4d4; padding: 30px;
+            border-radius: 28px; font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; text-align: left; box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            width: 100%; max-width: 800px; margin: 20px auto;
+        }
+
+        /* Gemini Interface */
+        .gemini-btn {
+            position: fixed; bottom: 40px; right: 40px; background: var(--gemini-gradient);
+            width: 72px; height: 72px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; color: white; cursor: pointer; box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+            z-index: 2000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gemini-btn:hover { transform: scale(1.1) rotate(5deg); }
+
+        #geminiModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(30px); z-index: 3000;
+            justify-content: center; align-items: center;
+        }
+        .modal-card { background: white; width: 90%; max-width: 850px; border-radius: 45px; padding: 50px; position: relative; }
+        #chatInput { width: 100%; padding: 24px; border: 1px solid #d2d2d7; border-radius: 20px; font-size: 1.1rem; outline: none; margin: 25px 0; background: #fbfbfd; }
+        #chatResponse { background: #f5f5f7; padding: 30px; border-radius: 25px; max-height: 350px; overflow-y: auto; text-align: left; line-height: 1.8; }
+
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 1100px) {
+            section { padding: 80px 30px; }
+            h2 { font-size: 2.2rem; }
+            .img-wrapper { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">AED III · Fundamentos de IA & LLM Magistral</div>
+            <div class="nav-links">
+                <a href="#hero">Inicio</a>
+                <a href="#modulos">Los 8 Módulos</a>
+                <a href="#mecanica">Mecánica</a>
+                <a href="#profundizacion">Profundización</a>
+                <a href="#cierre">Sankalpa</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dots-menu" id="dotNav"></div>
+
+    <div class="presentation-container" id="deck">
+        
+        <!-- S1: HERO ACTUALIZADO -->
+        <section id="hero">
+            <div class="slide-content">
+                <span class="tag">Unidad 7 · La Frontera del Silicio</span>
+                <h1>IA y Modelos de Lenguaje (LLM)</h1>
+                <p>Nuevos paradigmas de soberanía técnica: Cómo el ingeniero comprende y orquesta la inteligencia artificial para liderar la evolución del software consciente.</p>
+                <div class="img-wrapper">
+                    <!-- Nueva imagen de red neuronal abstracta limpia -->
+                    <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200" alt="IA Concepto Vanguardista">
+                </div>
+            </div>
+            <div class="slide-footer">Prof. Jose Luis Oemig · Algoritmos III · Facultad de Ingeniería</div>
+        </section>
+
+        <!-- S2: DEFINICIÓN ULTRA DENSA -->
+        <section id="que-es">
+            <div class="slide-content">
+                <span class="tag">Módulo 01 · Fundamentación Ontológica</span>
+                <h1>Ontología de la IA</h1>
+                <div class="card">
+                    <p>La Inteligencia Artificial es el conjunto de algoritmos y arquitecturas diseñadas para procesar información mediante la emulación de procesos cognitivos no lineales. En su estado del arte, se basa en el **Deep Learning**: redes neuronales multicapa que ajustan billones de pesos matemáticos para aprender representaciones vectoriales de la realidad. <br><br> Para el ingeniero de Algoritmos III, la IA no es un oráculo, sino un **razonador estocástico**. Comprender su naturaleza implica reconocer que la IA no "sabe" nada en un sentido cartesiano; lo que hace es mapear una intención humana (prompt) hacia una respuesta técnica mediante la predicción probabilística de secuencias de tokens, permitiendo una simbiosis donde el humano aporta el propósito y la máquina la potencia de ejecución.</p>
+                </div>
+            </div>
+            <div class="slide-footer">La Inferencia como Nuevo Motor de Cálculo</div>
+        </section>
+
+        <!-- S3: MAPA MAESTRO EXPANDIDO -->
+        <section id="roadmap">
+            <div class="slide-content">
+                <span class="tag">Hoja de Ruta Académica</span>
+                <h2>Mapa Maestro de la Unidad</h2>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 30px;">
+                    <div class="card" style="padding: 25px; background: white; text-align: left;">
+                        <h3>1. Ontología y Arquitectura</h3>
+                        <p style="font-size: 0.95rem;">Del Perceptrón a los Transformers. Análisis del mecanismo de Auto-Atención como solución al problema de la memoria secuencial en el código fuente.</p>
+                    </div>
+                    <div class="card" style="padding: 25px; background: white; text-align: left;">
+                        <h3>2. Mecánica del Token y VRAM</h3>
+                        <p style="font-size: 0.95rem;">La unidad mínima semántica. Desglosamos la tokenización, el cálculo de pesos y la orquestación física en la VRAM de la GPU mediante modelos GGUF.</p>
+                    </div>
+                    <div class="card" style="padding: 25px; background: white; text-align: left;">
+                        <h3>3. Orquestación y Agentes</h3>
+                        <p style="font-size: 0.95rem;">Implementación profesional de RAG (Retrieval Augmented Generation) y Agentes que planifican, ejecutan y auditan código asíncronamente.</p>
+                    </div>
+                    <div class="card" style="padding: 25px; background: white; text-align: left;">
+                        <h3>4. Soberanía Ética y Sankalpa</h3>
+                        <p style="font-size: 0.95rem;">Límites de la inferencia, responsabilidad civil del ingeniero y la intención consciente en el diseño de arquitecturas resilientes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">Planificación Integral de la Ingeniería Aumentada</div>
+        </section>
+
+        <!-- S4: LOS 8 MÓDULOS DE LA UNIDAD 7 -->
+        <section id="modulos">
+            <div class="slide-content full-width">
+                <span class="tag">Recapitulación de Cátedra</span>
+                <h2>Estructura Sistémica de la Unidad</h2>
+                <p style="margin-bottom: 30px;">Ocho pilares diseñados para forjar al Ingeniero Aumentado del siglo XXI.</p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%;">
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M1</strong> IA Local & Soberanía</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M2</strong> Entorno & IDE IA</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M3</strong> Modos Operativos</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M4</strong> Modelado & UML</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M5</strong> Escritura & Refactor</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M6</strong> Testing & Validación</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M7</strong> SDLC Integrado</div>
+                    <div class="card" style="padding: 15px; font-size: 0.85rem; border-top: 4px solid var(--apple-blue);"><strong>M8</strong> Ética & Responsabilidad</div>
+                </div>
+                <div class="card" style="margin-top: 30px; background: #fbfbfd;">
+                    <p style="font-weight: 700; color: var(--apple-blue);">"Esta arquitectura pedagógica asegura que el ingeniero no solo use herramientas, sino que domine el ecosistema de inferencia masiva."</p>
+                </div>
+            </div>
+            <div class="slide-footer">Los 8 Módulos de la Maestría Aumentada</div>
+        </section>
+
+        <!-- S5: TRANSFORMERS -->
+        <section id="transformers">
+            <div class="slide-content">
+                <span class="tag">La Revolución de 2017</span>
+                <h2>Arquitectura Transformer</h2>
+                <div class="card">
+                    <p>El Transformer es el núcleo de todos los LLMs modernos. Su mayor avance es el mecanismo de **Auto-Atención (Self-Attention)**, que permite al modelo procesar secuencias completas de código simultáneamente. <br><br> A diferencia de las redes neuronales recurrentes antiguas que perdían el contexto al avanzar las líneas, el Transformer mantiene relaciones semánticas entre una clase definida al inicio de un proyecto y su uso cientos de archivos más abajo, permitiendo una generación coherente, contextual y arquitectónicamente sólida.</p>
+                </div>
+                <div class="img-wrapper" style="height: 300px;">
+                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=1200" alt="Arquitectura Digital">
+                </div>
+            </div>
+            <div class="slide-footer">El corazón técnico de GPT, Llama y Qwen</div>
+        </section>
+
+        <!-- S6: EL TOKEN -->
+        <section id="token">
+            <div class="slide-content">
+                <span class="tag">Unidad de Medida</span>
+                <h2>El Token: Átomo de Información</h2>
+                <div class="card">
+                    <p>Los LLMs no leen palabras, sino tokens: fragmentos numéricos que el modelo procesa estadísticamente. 1.000 tokens equivalen aproximadamente a 750 palabras de código. <br><br> Gestionar la **Ventana de Contexto** es gestionar la memoria de corto plazo de la IA. Si el ingeniero satura el prompt con archivos irrelevantes, el modelo pierde la "atención" sobre los requerimientos centrales, incurriendo en alucinaciones o degradación lógica del sistema.</p>
+                </div>
+                <div class="code-window">
+<pre style="margin:0;"><span style="color:#6a9955">// Entrada: "int main() {"</span>
+<span style="color:#ce9178">Tokens: ["int", " main", "(", ")", " {"]</span></pre>
+                </div>
+            </div>
+            <div class="slide-footer">Mecánica de Procesamiento Textual en Ingeniería</div>
+        </section>
+
+        <!-- S7: COMPETENCIAS AMPLIADAS (DENSO) -->
+        <section id="competencias">
+            <div class="slide-content full-width">
+                <span class="tag">Síntesis Académica Profesional</span>
+                <h1>Competencias del Nuevo Ingeniero</h1>
+                <div class="card" style="text-align: left; background: white; border: 1px solid #eee;">
+                    <p style="margin-bottom: 25px;">El dominio de la IA exige una amalgama de habilidades que transforman al desarrollador tradicional en un **Arquitecto de Intención**. Estas competencias definen el valor estratégico del profesional hoy:</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 35px;">
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Orquestación de Inferencia</h3>
+                            <p style="font-size: 0.95rem;">Capacidad de configurar infraestructuras de inferencia local (Ollama, GPU, YAML) para garantizar soberanía y latencia mínima. El ingeniero debe saber elegir entre modelos 1B para autocompletado y 70B para razonamiento arquitectónico pesado, optimizando el uso de la VRAM.</p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Auditoría Semántica</h3>
+                            <p style="font-size: 0.95rem;">Habilidad quirúrgica para validar la lógica probabilística generada. Consiste en diferenciar entre código que simplemente "compila" y algoritmos que cumplen rigurosamente con la complejidad Big O óptima, asegurando la eficiencia real del sistema bajo carga.</p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Liderazgo Ético y Soberano</h3>
+                            <p style="font-size: 0.95rem;">Responsabilidad final sobre la autoría del software. El ingeniero diseña con intención consciente (Sankalpa), asegurando que la IA actúe como un asistente y no como un decisor. Firmar un binario es un acto de compromiso legal y moral inalienable.</p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Arquitectura de Intención</h3>
+                            <p style="font-size: 0.95rem;">Elevación del nivel de abstracción: el profesional ya no escribe líneas de código de forma manual y artesanal, sino que pilota intenciones arquitectónicas complejas mediante ingeniería de prompts de alta fidelidad, traduciendo requerimientos en sistemas robustos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">El Perfil del Ingeniero del Siglo XXI</div>
+        </section>
+
+        <!-- S8: EL TRÍPODE DE LA INTEGRIDAD (AMPLIADO) -->
+        <section id="tripode">
+            <div class="slide-content full-width">
+                <span class="tag">Principios Fundamentales de la Cátedra</span>
+                <h1>El Trípode de la Integridad Profesional</h1>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; text-align: left;">
+                    <div class="card" style="background: white; border: 1px solid #eee;">
+                        <h3 style="color:var(--apple-blue);">Verificabilidad Empírica</h3>
+                        <p style="font-size: 0.95rem;">Nada entra al codebase sin ser validado por una batería de pruebas unitarias y de integración. El código generado por IA es una hipótesis, no una verdad. La confianza se construye con tests que demuestran matemáticamente la corrección de la lógica propuesta.</p>
+                    </div>
+                    <div class="card" style="background: white; border: 1px solid #eee;">
+                        <h3 style="color:var(--apple-blue);">Entendimiento Profundo</h3>
+                        <p style="font-size: 0.95rem;">La soberanía intelectual exige comprender cada línea sugerida. Si el ingeniero no puede realizar una arqueología de código inmediata sobre la sugerencia de la IA y justificar su diseño, entonces ese código es una deuda técnica encubierta que no debe ser aceptada.</p>
+                    </div>
+                    <div class="card" style="background: white; border: 1px solid #eee;">
+                        <h3 style="color:var(--apple-blue);">Responsabilidad Soberana</h3>
+                        <p style="font-size: 0.95rem;">El ingeniero es el único autor legítimo ante la ley y la ética. Delegar la escritura a una IA no exime al profesional de las consecuencias de un fallo crítico. El arquitecto humano es el único garante de la seguridad, la privacidad y la vida de los usuarios finales.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">Fundamentos Éticos de la Ingeniería Aumentada</div>
+        </section>
+
+        <!-- --- SECCIÓN DE PROFUNDIZACIÓN MAGISTRAL --- -->
+        
+        <section id="prof-attention">
+            <div class="slide-content">
+                <span class="tag">Profundización 01 · Mecánica</span>
+                <h3>Attention is All You Need: El Mecanismo</h3>
+                <div class="card" style="text-align: left;">
+                    <p>El mecanismo de Auto-Atención permite que cada token en una secuencia de código calcule su relevancia respecto a todos los demás tokens simultáneamente. Esto se resuelve mediante matrices de **Queries (Q), Keys (K) y Values (V)**. <br><br> Para el ingeniero de software, esto significa el fin de la memoria secuencial limitada: la IA puede "entender" que una variable definida en la línea 1 tiene una relación crítica con una condición lógica en la línea 500, permitiendo una orquestación semántica coherente que las arquitecturas antiguas no podían sostener.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Entendiendo el Corazón del Transformer</div>
+        </section>
+
+        <section id="prof-embeddings">
+            <div class="slide-content">
+                <span class="tag">Profundización 02 · Geometría</span>
+                <h3>Espacios Vectoriales y Embeddings</h3>
+                <div class="card" style="text-align: left;">
+                    <p>Un embedding es la representación numérica de un concepto en un hiper-espacio de cientos de dimensiones. Los LLMs "ven" el código como puntos y trayectorias en este espacio. <br><br> La cercanía entre dos vectores representa cercanía semántica. Esta es la base técnica del **RAG (Retrieval Augmented Generation)** local: el sistema no busca palabras clave, busca significados. Permite recuperar el módulo exacto que la arquitectura requiere para responder a un prompt, inyectando contexto real y privado en milisegundos.</p>
+                </div>
+            </div>
+            <div class="slide-footer">La Geometría de la Semántica Algorítmica</div>
+        </section>
+
+        <section id="prof-temp">
+            <div class="slide-content">
+                <span class="tag">Profundización 03 · Control</span>
+                <h3>Temperatura y Estocasticidad</h3>
+                <div class="card" style="text-align: left;">
+                    <p>El parámetro de Temperatura controla la aleatoriedad en la elección del siguiente token. Una temperatura baja (0.1 - 0.2) aplana la distribución de probabilidad, forzando a la IA a elegir siempre el camino más conservador y predecible. <br><br> En ingeniería de software, usamos temperaturas bajas para garantizar que la implementación de estructuras de datos como Grafos sea exacta y determinística. Una temperatura alta aumenta la "creatividad", pero en nuestro campo, eso se traduce frecuentemente en alucinaciones sintácticas peligrosas.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Control del Razonamiento Probabilístico</div>
+        </section>
+
+        <section id="prof-agents">
+            <div class="slide-content">
+                <span class="tag">Profundización 04 · Futuro</span>
+                <h3>Flujos Agénticos (Agentic Workflows)</h3>
+                <div class="card" style="text-align: left;">
+                    <p>El futuro de la IA integrada no es un chat aislado, sino una orquestación de agentes con autonomía acotada. Un agente es un LLM con acceso a herramientas (Terminal, File System). <br><br> Un flujo agéntico puede recibir un reporte de bug, reproducirlo mediante un test generado, proponer una corrección y validarla antes de notificar al ingeniero. Tu labor como Senior será el diseño y supervisión de estos flujos, actuando como el director de un equipo digital altamente eficiente y escalable.</p>
+                </div>
+            </div>
+            <div class="slide-footer">El Siguiente Paso en la Automatización de Software</div>
+        </section>
+
+        <!-- S32: RESUMEN FINAL -->
+        <section id="resumen">
+            <div class="slide-content full-width">
+                <span class="tag">Síntesis de la Masterclass</span>
+                <h2>Resumen de Aprendizajes Sistémicos</h2>
+                <div class="card" style="text-align: left; background: var(--apple-light-gray);">
+                    <p>• <strong>Ontología:</strong> La IA es un razonador probabilístico basado en Auto-Atención y procesamiento masivo de datos.<br>
+                    • <strong>Infraestructura:</strong> La soberanía reside en la inferencia local (Ollama) para proteger la Propiedad Intelectual.<br>
+                    • <strong>Mecánica:</strong> Gestionar el token es gestionar la memoria asociativa de la ventana de contexto.<br>
+                    • <strong>Ética:</strong> El ingeniero es el auditor final innegociable; la firma profesional conlleva responsabilidad civil total.<br>
+                    • <strong>Maestría:</strong> Integrar la IA para elevar el diseño estratégico manteniendo el rigor técnico de los primeros principios.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Conceptos Clave para el Cierre de Unidad</div>
+        </section>
+
+        <!-- S33: CIERRE SANKALPA MAGISTRAL -->
+        <section id="cierre">
+            <div class="slide-content full-width">
+                <span class="tag">Jose Luis Oemig / Sankalpa</span>
+                <h1>Ingeniería con Propósito</h1>
+                <div class="img-wrapper" style="height: 280px; max-width: 600px; margin: 30px auto; border-radius: 50%;">
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200" alt="Equilibrio Sankalpa">
+                </div>
+                <div style="max-width: 850px; margin: 0 auto; text-align: center;">
+                    <p>Dominar la tecnología es solo el primer paso. El verdadero éxito del ingeniero reside en su capacidad para orquestar la técnica con **Sankalpa** (intención consciente), transformando la complejidad estocástica de la IA en armonía sistémica. La potencia masiva de los tokens es el pincel, pero la claridad del sistema nace siempre de la quietud y el propósito de tu propio pensamiento soberano.</p>
+                    <div style="margin-top: 40px; font-weight: 900; font-size: 1.5rem; background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        "Donde hay orden en el pensamiento, hay paz en el despliegue."
+                    </div>
+                </div>
+                <button onclick="document.getElementById('deck').scrollTo({top:0, behavior:'smooth'})" style="margin-top: 40px; padding:15px 40px; border-radius:30px; border:none; background:var(--apple-black); color:white; font-weight:700; cursor:pointer;">Reiniciar Cátedra Magistral</button>
+            </div>
+            <div class="slide-footer">Soberanía Intelectual y Consciencia Técnica Final · AED III</div>
+        </section>
+
+    </div>
+
+    <!-- Gemini assistant -->
+    <div class="gemini-btn" onclick="toggleModal()"><i data-lucide="sparkles"></i></div>
+
+    <div id="geminiModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.6rem;"><i data-lucide="bot" style="vertical-align:middle; margin-right:12px; color:var(--apple-blue);"></i> Consultor Académico</h2>
+                <i data-lucide="x" onclick="toggleModal()" style="cursor:pointer; opacity:0.3;"></i>
+            </div>
+            <p style="color:var(--apple-gray); margin-top:10px;">Consulta técnica profunda sobre IA, LLMs y Orquestación Ética.</p>
+            <input type="text" id="chatInput" placeholder="Ej: ¿Cómo audito el factor de atención en una clase C++?" onkeypress="if(event.key==='Enter') askGemini()">
+            <button onclick="askGemini()" id="sendBtn" style="width:100%; padding:18px; border-radius:15px; border:none; background:var(--apple-blue); color:white; font-weight:700; cursor:pointer;">Consultar a Gemini</button>
+            <div id="chatResponse" style="margin-top:20px; display:none; background:#f5f5f7; padding:20px; border-radius:15px; max-height:300px; overflow-y:auto; text-align:left; line-height: 1.8;"></div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Presentation Controller
+        const deck = document.getElementById('deck');
+        const sections = document.querySelectorAll('section');
+        const dotNav = document.getElementById('dotNav');
+
+        // Pool de animaciones azarosas
+        const animPool = ['anim-zoom', 'anim-up', 'anim-down', 'anim-left', 'anim-right', 'anim-flip'];
+
+        sections.forEach((s, i) => {
+            const content = s.querySelector('.slide-content');
+            if (content) {
+                const randomAnim = animPool[Math.floor(Math.random() * animPool.length)];
+                content.classList.add(randomAnim);
+            }
+
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.dataset.target = s.id;
+            dot.onclick = () => {
+                const target = document.getElementById(dot.dataset.target);
+                deck.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+            };
+            dotNav.appendChild(dot);
+        });
+
+        deck.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => { if (deck.scrollTop >= s.offsetTop - 100) current = s.id; });
+            sections.forEach(s => s.classList.toggle('visible', s.id === current));
+            document.querySelectorAll('.dot').forEach(d => d.classList.toggle('active', d.dataset.target === current));
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+        });
+
+        // Gemini API Configuration
+        const apiKey = "AIzaSyCu3GxkJ3yp4uCEKNyDxrwx0EDkupW-NOU"; 
+        const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        async function apiCall(prompt, system) {
+            try {
+                const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: system }] } })
+                });
+                const data = await res.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { return "Error de conexión técnica."; }
+        }
+
+        function toggleModal() {
+            const m = document.getElementById('geminiModal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') document.getElementById('chatInput').focus();
+        }
+
+        async function askGemini() {
+            const i = document.getElementById('chatInput');
+            const r = document.getElementById('chatResponse');
+            const btn = document.getElementById('sendBtn');
+            const q = i.value.trim();
+            if(!q) return;
+
+            btn.disabled = true; btn.innerHTML = 'Razonando<span class="loader"></span>';
+            r.style.display = 'block'; r.innerHTML = '<em>Iniciando análisis semántico socrático...</em>';
+
+            const system = `Eres Jose Luis Oemig, docente de Algoritmos III. Resume temas de IA y LLMs de forma técnica y socrática. Explica detalladamente Transformers, Tokenización y Soberanía Intelectual.`;
+
+            try {
+                const text = await apiCall(q, system);
+                r.innerText = text;
+            } catch (e) { r.innerText = "Error."; }
+            finally { btn.disabled = false; btn.innerText = "Consultar a Gemini"; }
+        }
+
+        sections[0].classList.add('visible');
+    </script>
+</body>
+</html>

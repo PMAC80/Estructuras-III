@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Interactiva - IA Local Pro</title>
+    <!-- Bibliotecas -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #f5f5f7;
+            --apple-green: #34c759;
+            --apple-red: #ff3b30;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --glass: rgba(255, 255, 255, 0.85);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Container Principal */
+        .quiz-container {
+            width: 90%;
+            max-width: 800px;
+            background: white;
+            border-radius: 36px;
+            padding: 60px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.08);
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Header */
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .tag {
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--apple-gray);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin: 0;
+        }
+
+        /* Barra de Progreso */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #e5e5e7;
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background: var(--apple-blue);
+            transition: width 0.4s ease;
+        }
+
+        /* Preguntas */
+        .question-card {
+            display: none; /* Se activa por JS */
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 30px;
+        }
+
+        /* Opciones */
+        .options-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: var(--apple-bg);
+            padding: 20px 25px;
+            border-radius: 18px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option:hover {
+            background: #f0f0f2;
+            transform: scale(1.01);
+        }
+
+        .option.selected {
+            border-color: var(--apple-blue);
+            background: white;
+        }
+
+        .option.correct {
+            background: #e8f5e9;
+            border-color: var(--apple-green);
+            color: #1b5e20;
+        }
+
+        .option.wrong {
+            background: #ffebee;
+            border-color: var(--apple-red);
+            color: #b71c1c;
+        }
+
+        /* Feedback y Botones */
+        .feedback-area {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 20px;
+            background: #fbfbfd;
+            border-left: 4px solid var(--apple-blue);
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--apple-black);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn-gemini {
+            background: var(--gemini-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Final Screen */
+        .results-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid var(--apple-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0 auto 30px;
+        }
+
+        .sankalpa-msg {
+            font-style: italic;
+            color: var(--apple-gray);
+            margin-top: 40px;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 600px) {
+            .quiz-container { padding: 30px; }
+            h1 { font-size: 1.6rem; }
+            .controls { flex-direction: column; gap: 15px; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container" id="mainContainer">
+        
+        <!-- PANTALLA INICIAL -->
+        <div id="startScreen">
+            <div class="quiz-header">
+                <span class="tag">Evaluación de Progresión</span>
+                <h1>Ecosistema de IA Local</h1>
+                <p>Pon a prueba tu dominio técnico sobre Ollama, config.yaml y la arquitectura de modelos locales.</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px;">
+                <button class="btn btn-primary" onclick="startQuiz()">Comenzar Evaluación</button>
+            </div>
+        </div>
+
+        <!-- EVALUACIÓN -->
+        <div id="quizContent" style="display: none;">
+            <div class="progress-container">
+                <div id="progressBar"></div>
+            </div>
+            <div id="questionContainer"></div>
+            
+            <div class="feedback-area" id="feedbackArea">
+                <h4 style="margin:0 0 10px 0; color:var(--apple-blue);">Análisis Técnico</h4>
+                <p id="feedbackText" style="margin:0; font-size: 0.95rem;"></p>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-gemini" onclick="askTutor()">
+                    <i data-lucide="sparkles"></i> Explicación Socrática
+                </button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>
+                    Siguiente Pregunta
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA FINAL -->
+        <div id="resultScreen" class="results-screen">
+            <span class="tag">Resultado Final</span>
+            <h2 id="resultTitle">¡Evaluación Completada!</h2>
+            <div class="score-circle" id="finalScore">0</div>
+            <p id="resultText"></p>
+            
+            <div class="sankalpa-msg" id="sankalpaMsg"></div>
+
+            <button class="btn btn-primary" style="margin-top: 40px;" onclick="location.reload()">Reiniciar Práctica</button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Configuración de la Evaluación
+        const questions = [
+            {
+                q: "¿Cuál es el rol principal de Ollama en el ecosistema de IA local?",
+                options: [
+                    "Es un editor de texto avanzado para C++.",
+                    "Es un Model Server que gestiona la inferencia y carga de pesos.",
+                    "Es un plugin exclusivo de VS Code para Python.",
+                    "Es una base de datos vectorial para guardar tokens."
+                ],
+                correct: 1,
+                hint: "Piensa en el puerto 11434 y cómo expone los modelos mediante una API."
+            },
+            {
+                q: "En una configuración moderna de Continue.dev, ¿cuál es el archivo de orquestación?",
+                options: [
+                    "config.json",
+                    "settings.py",
+                    "config.yaml",
+                    "ollama.conf"
+                ],
+                correct: 2,
+                hint: "Las nuevas versiones han migrado de JSON a un formato más legible para humanos."
+            },
+            {
+                q: "¿Qué sucede técnicamente durante el proceso de Cuantización (ej. GGUF)?",
+                options: [
+                    "Se aumenta la precisión de los pesos para mayor exactitud.",
+                    "Se comprime el código fuente para que ocupe menos espacio en disco.",
+                    "Se reduce la precisión de los pesos (ej. 16-bit a 4-bit) para ahorrar VRAM.",
+                    "Se indexa el proyecto completo en la nube."
+                ],
+                correct: 2,
+                hint: "Es el equilibrio entre performance de hardware y capacidad de razonamiento."
+            },
+            {
+                q: "¿Qué define la 'Ventana de Contexto' en un modelo de lenguaje?",
+                options: [
+                    "El número de monitores que usa el desarrollador.",
+                    "El límite máximo de tokens que el modelo puede procesar simultáneamente.",
+                    "La velocidad de internet necesaria para descargar el modelo.",
+                    "El tiempo que tarda la GPU en enfriarse tras una consulta."
+                ],
+                correct: 1,
+                hint: "Es la memoria de corto plazo o 'memoria de trabajo' de la IA."
+            },
+            {
+                q: "¿Por qué preferimos el modelo Qwen2.5-Coder frente a Llama 3 para Algoritmos III?",
+                options: [
+                    "Porque es más liviano y no requiere GPU.",
+                    "Porque fue entrenado específicamente en billones de líneas de código fuente.",
+                    "Porque es de código abierto y Llama no.",
+                    "Porque permite generar imágenes UML automáticamente."
+                ],
+                correct: 1,
+                hint: "Un especialista siempre supera a un generalista en tareas quirúrgicas."
+            },
+            {
+                q: "¿Cuál es el beneficio de invertir en hardware propio (CAPEX) frente a suscripciones (OPEX)?",
+                options: [
+                    "El hardware local no requiere electricidad.",
+                    "Soberanía total de datos y uso ilimitado sin costo por token.",
+                    "La IA local es siempre más inteligente que la IA en la nube.",
+                    "No hay beneficio, la nube siempre es mejor."
+                ],
+                correct: 1,
+                hint: "Analiza el concepto de Propiedad Intelectual y privacidad."
+            },
+            {
+                q: "¿Qué técnica permite superar los límites de la Ventana de Contexto inyectando solo fragmentos relevantes?",
+                options: [
+                    "SSH Tunneling.",
+                    "RAG (Retrieval Augmented Generation).",
+                    "Compilación JIT.",
+                    "Recursión de cola."
+                ],
+                correct: 1,
+                hint: "Es una 'búsqueda semántica' que trae el contexto bajo demanda."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        const apiKey = ""; // Runtime provided
+
+        // Lógica del Quiz
+        function startQuiz() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('quizContent').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            const container = document.getElementById('questionContainer');
+            document.getElementById('feedbackArea').style.display = 'none';
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('progressBar').style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+            let html = `
+                <div class="question-card active">
+                    <span class="tag">Pregunta ${currentQuestion + 1} de ${questions.length}</span>
+                    <h2>${q.q}</h2>
+                    <div class="options-grid">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" onclick="checkAnswer(${i})" id="opt-${i}">
+                                ${opt}
+                                <i data-lucide="circle" class="icon-state"></i>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function checkAnswer(index) {
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Deshabilitar clicks adicionales
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+
+            if (index === q.correct) {
+                document.getElementById(`opt-${index}`).classList.add('correct');
+                score++;
+                showFeedback("¡Correcto! Has captado la esencia técnica del concepto.");
+            } else {
+                document.getElementById(`opt-${index}`).classList.add('wrong');
+                document.getElementById(`opt-${q.correct}`).classList.add('correct');
+                showFeedback(`Respuesta incorrecta. El punto clave aquí es: ${q.hint}`);
+            }
+
+            document.getElementById('nextBtn').disabled = false;
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('nextBtn').innerText = "Ver Resultados";
+            }
+        }
+
+        function showFeedback(text) {
+            const area = document.getElementById('feedbackArea');
+            const p = document.getElementById('feedbackText');
+            area.style.display = 'block';
+            p.innerText = text;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizContent').style.display = 'none';
+            const screen = document.getElementById('resultScreen');
+            screen.style.display = 'block';
+            
+            const finalPuntaje = Math.round((score / questions.length) * 10);
+            document.getElementById('finalScore').innerText = finalPuntaje;
+
+            let msg = "";
+            let sankalpa = "";
+
+            if(finalPuntaje >= 8) {
+                msg = "Dominio Técnico Excepcional. Estás listo para liderar la implementación de IA en entornos de ingeniería.";
+                sankalpa = "Tu mente técnica brilla. Recuerda que este poder debe ser usado para crear orden y armonía en cada línea de código que escribas.";
+            } else if(finalPuntaje >= 5) {
+                msg = "Buen nivel de comprensión. Te sugiero repasar la configuración del config.yaml y la gestión de tokens.";
+                sankalpa = "El aprendizaje es un proceso de alineación. Sigue profundizando hasta que la técnica se vuelva una extensión natural de tu intención.";
+            } else {
+                msg = "Necesitas reforzar los conceptos base. La IA local requiere precisión en la configuración para ser efectiva.";
+                sankalpa = "No te desanimes. Cada error es una oportunidad de presencia. Vuelve a la teoría con una mirada renovada.";
+            }
+
+            document.getElementById('resultText').innerText = msg;
+            document.getElementById('sankalpaMsg').innerHTML = `<p>${sankalpa}</p><p><strong>— Ing. Jose Luis Oemig (Sankalpa)</strong></p>`;
+        }
+
+        // Integración con Gemini para Explicación Socrática
+        async function askTutor() {
+            const feedbackArea = document.getElementById('feedbackArea');
+            const feedbackText = document.getElementById('feedbackText');
+            const q = questions[currentQuestion];
+
+            feedbackArea.style.display = 'block';
+            feedbackText.innerHTML = '<span class="loader">El Tutor Socrático está analizando tu duda</span>';
+
+            const userPrompt = `Estoy en una evaluación sobre IA Local. La pregunta es: "${q.q}". La respuesta correcta es "${q.options[q.correct]}". Explícame el concepto técnico detrás de esto de forma socrática y breve, como lo haría un docente universitario de Algoritmos III.`;
+            
+            const systemPrompt = "Eres Jose Luis Oemig, experto en Ingeniería y Lic. en Educación. Tu tono es profesional, motivador y técnico. No des la respuesta directamente si no se ha respondido aún, guía al alumno.";
+
+            try {
+                const response = await callGemini(userPrompt, systemPrompt);
+                feedbackText.innerText = response;
+            } catch (error) {
+                feedbackText.innerText = "Lo siento, la conexión con el tutor se ha interrumpido. Revisa tu conexión local.";
+            }
+        }
+
+        async function callGemini(prompt, system) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: system }] }
+                })
+            });
+            const data = await res.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+    </script>
+</body>
+</html>
